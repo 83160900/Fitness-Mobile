@@ -112,6 +112,23 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
 
+                  const SizedBox(height: 40),
+                  // Seção de Cadastro para Profissionais
+                  const Text(
+                    'Cadastre-se como Profissional',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildRoleIcon(Icons.person_pin_rounded, 'Personal', Colors.blue, 'PERSONAL'),
+                      _buildRoleIcon(Icons.restaurant, 'Nutri', Colors.green, 'NUTRICIONISTA'),
+                      _buildRoleIcon(Icons.healing, 'Fisio', Colors.red, 'FISIOTERAPEUTA'),
+                      _buildRoleIcon(Icons.accessibility_new, 'Quiro', Colors.orange, 'QUIROPRAXIA'),
+                    ],
+                  ),
+
                   const SizedBox(height: 32),
                 ],
               ),
