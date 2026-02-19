@@ -21,17 +21,17 @@ class StudentDetailPage extends StatelessWidget {
             const SizedBox(height: 32),
             
             // Seção de Treinos
-            _buildSectionTitle('Treinos Atuais'),
+            _buildSectionTitle(context, 'Treinos Atuais'),
             _buildTrainingCard(),
             const SizedBox(height: 24),
 
             // Dashboard de Bioimpedância (Gráfico Simulado)
-            _buildSectionTitle('Evolução Bioimpedância'),
+            _buildSectionTitle(context, 'Evolução Bioimpedância'),
             _buildBioimpedanceChart(),
             const SizedBox(height: 24),
 
             // Comparativo Antes e Depois (Mocado)
-            _buildSectionTitle('Evolução Física (Antes vs Depois)'),
+            _buildSectionTitle(context, 'Evolução Física (Antes vs Depois)'),
             _buildBeforeAfterGallery(),
             const SizedBox(height: 32),
           ],
@@ -63,12 +63,29 @@ class StudentDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
+  Widget _buildSectionTitle(BuildContext context, String title, [String? studentEmail]) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
-      child: Text(
-        title,
-        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          if (title == 'Treinos Atuais')
+            TextButton.icon(
+              onPressed: () {
+                final Map<String, dynamic> args = {
+                  'student': student,
+                  'coachEmail': 'personal@teste.com', // Aqui idealmente viria do Provider/Auth
+                };
+                Navigator.pushNamed(context, '/create-workout', arguments: args);
+              },
+              icon: const Icon(Icons.add, size: 18),
+              label: const Text('Novo'),
+            ),
+        ],
       ),
     );
   }

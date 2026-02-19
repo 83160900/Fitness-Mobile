@@ -1,10 +1,11 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'pages/common/login_page.dart';
 import 'pages/common/registration_page.dart';
 import 'pages/dashboard/dashboard_page.dart';
 import 'pages/personal/students_page.dart';
 import 'pages/personal/student_detail_page.dart';
 import 'pages/personal/invite_page.dart';
+import 'pages/personal/create_workout_page.dart';
 
 void main() {
   runApp(FitnessApp());
@@ -78,6 +79,15 @@ class FitnessApp extends StatelessWidget {
           final args = settings.arguments as Map<String, dynamic>? ?? {};
           return MaterialPageRoute(
             builder: (context) => InvitePage(professionalEmail: args['email'] ?? ''),
+          );
+        }
+        if (settings.name == '/create-workout') {
+          final args = settings.arguments as Map<String, dynamic>? ?? {};
+          return MaterialPageRoute(
+            builder: (context) => CreateWorkoutPage(
+              student: args['student'] ?? {},
+              coachEmail: args['coachEmail'] ?? '',
+            ),
           );
         }
         return null;
