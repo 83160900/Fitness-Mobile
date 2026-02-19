@@ -22,17 +22,21 @@ class StudentDetailPage extends StatelessWidget {
             
             // Seção de Treinos
             _buildSectionTitle(context, 'Treinos Atuais'),
-            _buildTrainingCard(),
+            // Card mocado removido para limpeza de dados fakes
+            const Center(child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 20),
+              child: Text('Nenhum treino cadastrado ainda para este aluno.', style: TextStyle(color: Colors.grey, fontSize: 13)),
+            )),
             const SizedBox(height: 24),
 
-            // Dashboard de Bioimpedância (Gráfico Simulado)
-            _buildSectionTitle(context, 'Evolução Bioimpedância'),
-            _buildBioimpedanceChart(),
-            const SizedBox(height: 24),
+            // Dashboard de Bioimpedância (Ocultado conforme solicitado)
+            // _buildSectionTitle(context, 'Evolução Bioimpedância'),
+            // _buildBioimpedanceChart(),
+            // const SizedBox(height: 24),
 
-            // Comparativo Antes e Depois (Mocado)
-            _buildSectionTitle(context, 'Evolução Física (Antes vs Depois)'),
-            _buildBeforeAfterGallery(),
+            // Comparativo Antes e Depois (Ocultado conforme solicitado)
+            // _buildSectionTitle(context, 'Evolução Física (Antes vs Depois)'),
+            // _buildBeforeAfterGallery(),
             const SizedBox(height: 32),
           ],
         ),
