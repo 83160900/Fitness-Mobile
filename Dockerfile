@@ -12,7 +12,5 @@ RUN flutter build web --release
 FROM nginx:stable-alpine
 COPY --from=build /app/build/web /usr/share/nginx/html
 
-# Expor porta padrão
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+# Comando para injetar a porta do Railway dinamicamente e rodar o Nginx
+CMD ["sh", "-c", "sed -i 's/listen       80;/listen       '\"$PORT\"';/g' /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]
