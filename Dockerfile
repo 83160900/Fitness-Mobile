@@ -24,8 +24,5 @@ RUN flutter build web --release
 FROM nginx:alpine
 COPY --from=build-env /app/build/web /usr/share/nginx/html
 
-# Configurar porta do Railway
-RUN sed -i 's/listen       80;/listen       8080;/g' /etc/nginx/conf.d/default.conf
-
-EXPOSE 8080
-CMD ["nginx", "-g", "daemon off;"]
+# Script para injetar a porta do Railway dinamicamente no Nginx
+CMD ["sh", "-c", "sed -i 's/listen       80;/listen       '\"$PORT\"';/g' /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]
