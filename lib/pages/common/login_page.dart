@@ -33,12 +33,14 @@ class _LoginPageState extends State<LoginPage> {
               TextField(
                 controller: userController,
                 decoration: InputDecoration(labelText: 'E-mail', border: OutlineInputBorder()),
+                onSubmitted: (_) => _handleLogin(),
               ),
               SizedBox(height: 16),
               TextField(
                 controller: passController,
                 obscureText: true,
                 decoration: InputDecoration(labelText: 'Senha', border: OutlineInputBorder()),
+                onSubmitted: (_) => _handleLogin(),
               ),
               SizedBox(height: 24),
               if (_isLoading)
