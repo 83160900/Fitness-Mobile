@@ -1,6 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'pages/common/login_page.dart';
 import 'pages/common/change_password_page.dart';
+import 'pages/common/registration_page.dart';
 import 'pages/dashboard/dashboard_page.dart';
 import 'pages/personal/students_page.dart';
 import 'pages/personal/student_detail_page.dart';
@@ -94,8 +95,7 @@ class FitnessApp extends StatelessWidget {
       },
       routes: {
         '/': (context) => LoginPage(),
-        // Rota de registro removida da navegação pública
-        // '/register': (context) => RegisterPage(),
+        '/register': (context) => RegistrationPage(),
         '/dashboard': (context) => DashboardPage(),
         '/change-password': (context) {
           final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>? ?? {};
