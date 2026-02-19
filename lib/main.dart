@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'pages/common/login_page.dart';
 import 'pages/common/registration_page.dart';
 import 'pages/dashboard/dashboard_page.dart';
@@ -18,7 +18,7 @@ class FitnessApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF00BFA5), // Verde Ãgua / SaÃºde
+          seedColor: const Color(0xFF00BFA5), // Verde ÃƒÂgua / SaÃƒÂºde
           primary: const Color(0xFF00BFA5),
           secondary: const Color(0xFF00796B),
           tertiary: const Color(0xFF26A69A),
