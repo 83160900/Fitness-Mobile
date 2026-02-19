@@ -37,7 +37,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   padding: const EdgeInsets.all(4),
                   decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
                   constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-                  child: const Text('2', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold), textAlign: textAlign.center),
+                  child: Text('2', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
                 ),
               )
             ],
