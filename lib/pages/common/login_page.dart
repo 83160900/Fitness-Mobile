@@ -41,7 +41,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'FITNESS V3',
+                    'WORKING',
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.w900,
@@ -91,7 +91,21 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
 
-                  const SizedBox(height: 48),
+                  const SizedBox(height: 16),
+                  TextButton(
+                    onPressed: () {
+                      // Implementar lógica de recuperação de senha
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Funcionalidade de recuperação enviada para o e-mail.')),
+                      );
+                    },
+                    child: const Text(
+                      'Esqueceu a senha?',
+                      style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+
+                  const SizedBox(height: 32),
 
                   // Ícones de Identificação (Perfis)
                   const Text(
@@ -99,15 +113,22 @@ class _LoginPageState extends State<LoginPage> {
                     style: TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildRoleIcon(Icons.person, 'Aluno', Colors.blue, 'ALUNO'),
-                      _buildRoleIcon(Icons.fitness_center, 'Personal', Colors.orange, 'PERSONAL'),
-                      _buildRoleIcon(Icons.psychology, 'Terapeuta', Colors.purple, 'TERAPEUTA'),
-                      _buildRoleIcon(Icons.self_improvement, 'Quiro', Colors.teal, 'QUIROPRAXISTA'),
-                      _buildRoleIcon(Icons.apple, 'Nutro', Colors.red, 'NUTROLOGO'),
-                    ],
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _buildRoleIcon(Icons.person, 'Aluno', Colors.blue, 'ALUNO'),
+                        const SizedBox(width: 16),
+                        _buildRoleIcon(Icons.fitness_center, 'Personal', Colors.orange, 'PERSONAL'),
+                        const SizedBox(width: 16),
+                        _buildRoleIcon(Icons.medical_services, 'Fisioterapeuta', Colors.purple, 'FISIOTERAPEUTA'),
+                        const SizedBox(width: 16),
+                        _buildRoleIcon(Icons.self_improvement, 'Quiropraxia', Colors.teal, 'QUIROPRAXISTA'),
+                        const SizedBox(width: 16),
+                        _buildRoleIcon(Icons.apple, 'Nutricionista', Colors.red, 'NUTROLOGO'),
+                      ],
+                    ),
                   ),
 
                   const SizedBox(height: 32),
