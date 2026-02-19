@@ -162,6 +162,7 @@ class _DashboardPageState extends State<DashboardPage> {
         const Text('Próximas Ações', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
         _buildModuleCard(context, 'Meus Alunos', Icons.groups, Colors.blue, '/students', {'email': email}),
+        _buildModuleCard(context, 'Gerar Convite', Icons.link, Colors.teal, '/invite', {'email': email}),
         _buildModuleCard(context, 'Avaliação de Fotos', Icons.camera_alt, Colors.purple, '/photos'),
       ],
     );

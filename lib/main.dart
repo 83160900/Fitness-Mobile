@@ -4,6 +4,7 @@ import 'pages/common/registration_page.dart';
 import 'pages/dashboard/dashboard_page.dart';
 import 'pages/personal/students_page.dart';
 import 'pages/personal/student_detail_page.dart';
+import 'pages/personal/invite_page.dart';
 
 void main() {
   runApp(FitnessApp());
@@ -71,6 +72,12 @@ class FitnessApp extends StatelessWidget {
           final student = settings.arguments as Map<String, dynamic>? ?? {};
           return MaterialPageRoute(
             builder: (context) => StudentDetailPage(student: student),
+          );
+        }
+        if (settings.name == '/invite') {
+          final args = settings.arguments as Map<String, dynamic>? ?? {};
+          return MaterialPageRoute(
+            builder: (context) => InvitePage(professionalEmail: args['email'] ?? ''),
           );
         }
         return null;
