@@ -13,7 +13,7 @@ class _DashboardPageState extends State<DashboardPage> {
     final Map<String, dynamic> userData = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>? ?? {};
     final String role = userData['role'] ?? 'ALUNO';
     final String name = userData['name'] ?? 'Usuário';
-    final String email = userData['email'] ?? '';
+    final String userEmail = userData['email'] ?? '';
 
     return Scaffold(
       drawer: _buildDrawer(context, name, role),
@@ -37,7 +37,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   padding: const EdgeInsets.all(4),
                   decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
                   constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-                  child: const Text('2', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                  child: const Text('2', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold), textAlign: textAlign.center),
                 ),
               )
             ],
@@ -45,7 +45,7 @@ class _DashboardPageState extends State<DashboardPage> {
           const SizedBox(width: 8),
         ],
       ),
-      body: _buildBody(context, name, role),
+      body: _buildBody(context, name, role, userEmail),
     );
   }
 
@@ -98,7 +98,7 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Widget _buildBody(BuildContext context, String name, String role) {
+  Widget _buildBody(BuildContext context, String name, String role, String userEmail) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20.0),
       child: Column(
@@ -122,7 +122,7 @@ class _DashboardPageState extends State<DashboardPage> {
               ],
             ),
             const SizedBox(height: 32),
-            _buildActionSection(context, name, userData['email'] ?? ''),
+            _buildActionSection(context, name, userEmail),
           ],
           if (role == 'ALUNO') ...[
             Text('Olá, $name!', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
