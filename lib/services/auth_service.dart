@@ -26,4 +26,18 @@ class AuthService {
       return null;
     }
   }
+
+  Future<bool> register(Map<String, dynamic> userData) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/register'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(userData),
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      print('Erro ao registrar: $e');
+      return false;
+    }
+  }
 }

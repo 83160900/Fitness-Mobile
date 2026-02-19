@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'pages/common/login_page.dart';
+import 'pages/common/registration_page.dart';
 import 'pages/dashboard/dashboard_page.dart';
 
 void main() {
@@ -59,6 +60,7 @@ class FitnessApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => LoginPage(),
+        '/register': (context) => RegisterPage(),
         '/dashboard': (context) => DashboardPage(),
       },
       debugShowCheckedModeBanner: false,

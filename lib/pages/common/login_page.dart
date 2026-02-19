@@ -102,11 +102,11 @@ class _LoginPageState extends State<LoginPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _buildRoleIcon(Icons.person, 'Aluno', Colors.blue),
-                      _buildRoleIcon(Icons.fitness_center, 'Personal', Colors.orange),
-                      _buildRoleIcon(Icons.psychology, 'Terapeuta', Colors.purple),
-                      _buildRoleIcon(Icons.self_improvement, 'Quiro', Colors.teal),
-                      _buildRoleIcon(Icons.apple, 'Nutro', Colors.red),
+                      _buildRoleIcon(Icons.person, 'Aluno', Colors.blue, 'ALUNO'),
+                      _buildRoleIcon(Icons.fitness_center, 'Personal', Colors.orange, 'PERSONAL'),
+                      _buildRoleIcon(Icons.psychology, 'Terapeuta', Colors.purple, 'TERAPEUTA'),
+                      _buildRoleIcon(Icons.self_improvement, 'Quiro', Colors.teal, 'QUIROPRAXISTA'),
+                      _buildRoleIcon(Icons.apple, 'Nutro', Colors.red, 'NUTROLOGO'),
                     ],
                   ),
 
@@ -120,23 +120,28 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _buildRoleIcon(IconData icon, String label, Color color) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            shape: BoxShape.circle,
+  Widget _buildRoleIcon(IconData icon, String label, Color color, String role) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(context, '/register', arguments: role);
+      },
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: color, size: 24),
           ),
-          child: Icon(icon, color: color, size: 24),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: color),
-        ),
-      ],
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: color),
+          ),
+        ],
+      ),
     );
   }
 
