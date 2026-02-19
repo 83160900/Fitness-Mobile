@@ -21,11 +21,12 @@ RUN flutter pub get
 RUN flutter build web --release
 
 # Etapa de Execução (Servidor Web Leve)
-FROM nginx:alpine
+FROM nginx:stable-alpine
+# Copiar os arquivos gerados no build para a pasta padrão do Nginx
 COPY --from=build-env /app/build/web /usr/share/nginx/html
 
-# Configuração simples: Ouvir na porta 8080 (Padrão Railway para Docker)
-RUN sed -i 's/listen       80;/listen       8080;/g' /etc/nginx/conf.d/default.conf
+# Expor a porta 80 (padrão absoluto do Railway/Docker)
+EXPOSE 80
 
-EXPOSE 8080
+# Comando para rodar o Nginx na porta 80 e garantir que ele responda ao Railway
 CMD ["nginx", "-g", "daemon off;"]
