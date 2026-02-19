@@ -161,7 +161,8 @@ class _LoginPageState extends State<LoginPage> {
     try {
       final response = await _authService.login(user, pass);
       if (response != null) {
-        Navigator.pushReplacementNamed(context, '/dashboard', arguments: response['role']);
+        // Enviar o objeto completo de resposta para o dashboard
+        Navigator.pushReplacementNamed(context, '/dashboard', arguments: response);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Credenciais inválidas! Verifique e-mail e senha.')),
