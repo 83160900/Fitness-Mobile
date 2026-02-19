@@ -7,6 +7,8 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   String selectedRole = 'ALUNO';
+  final TextEditingController userController = TextEditingController();
+  final TextEditingController passController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -18,16 +20,18 @@ class _LoginPageState extends State<LoginPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'FITNESS PLATFORM',
+              'PLATAFORMA FITNESS',
               style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.blueAccent),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 48),
             TextField(
-              decoration: InputDecoration(labelText: 'Email', border: OutlineInputBorder()),
+              controller: userController,
+              decoration: InputDecoration(labelText: 'Usuário (ou E-mail)', border: OutlineInputBorder()),
             ),
             SizedBox(height: 16),
             TextField(
+              controller: passController,
               obscureText: true,
               decoration: InputDecoration(labelText: 'Senha', border: OutlineInputBorder()),
             ),
@@ -38,7 +42,7 @@ class _LoginPageState extends State<LoginPage> {
                 Text('Entrar como: '),
                 DropdownButton<String>(
                   value: selectedRole,
-                  items: ['ALUNO', 'PERSONAL'].map((String role) {
+                  items: ['ALUNO', 'PERSONAL', 'ADMIN'].map((String role) {
                     return DropdownMenuItem<String>(value: role, child: Text(role));
                   }).toList(),
                   onChanged: (value) {
@@ -54,7 +58,11 @@ class _LoginPageState extends State<LoginPage> {
               style: ElevatedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 16)),
               child: Text('ENTRAR'),
               onPressed: () {
-                Navigator.pushReplacementNamed(context, '/dashboard', arguments: selectedRole);
+                if (userController.text == 'admin' && passController.text == 'admin') {
+                  Navigator.pushReplacementNamed(context, '/dashboard', arguments: 'ADMIN');
+                } else {
+                  Navigator.pushReplacementNamed(context, '/dashboard', arguments: selectedRole);
+                }
               },
             ),
           ],

@@ -7,7 +7,7 @@ class DashboardPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Dashboard - $role'),
+        title: Text('Painel - $role'),
         actions: [
           IconButton(icon: Icon(Icons.logout), onPressed: () => Navigator.pushReplacementNamed(context, '/')),
         ],
@@ -27,6 +27,13 @@ class DashboardPage extends StatelessWidget {
   }
 
   Widget _buildModuleCard(BuildContext context, String title, Color color, String route, String role) {
+    String subtitle = 'Ver meus treinos';
+    if (role == 'PERSONAL') {
+      subtitle = 'Gerenciar alunos e treinos';
+    } else if (role == 'ADMIN') {
+      subtitle = 'Administração total do sistema';
+    }
+
     return Card(
       elevation: 4,
       margin: EdgeInsets.only(bottom: 16),
@@ -34,10 +41,9 @@ class DashboardPage extends StatelessWidget {
         contentPadding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
         leading: Icon(Icons.fitness_center, color: color, size: 40),
         title: Text(title, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-        subtitle: Text(role == 'PERSONAL' ? 'Gerenciar alunos e treinos' : 'Ver meus treinos'),
+        subtitle: Text(subtitle),
         trailing: Icon(Icons.arrow_forward_ios),
         onTap: () {
-          // Navegação para o módulo específico
           print('Navegando para $title como $role');
         },
       ),
