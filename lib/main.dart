@@ -18,7 +18,7 @@ class FitnessApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF00BFA5), // Verde ÃƒÂgua / SaÃƒÂºde
+          seedColor: const Color(0xFF00BFA5), // Verde ÃƒÆ’Ã‚Âgua / SaÃƒÆ’Ã‚Âºde
           primary: const Color(0xFF00BFA5),
           secondary: const Color(0xFF00796B),
           tertiary: const Color(0xFF26A69A),
