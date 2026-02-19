@@ -122,7 +122,7 @@ class _DashboardPageState extends State<DashboardPage> {
               ],
             ),
             const SizedBox(height: 32),
-            _buildActionSection(context, name, email),
+            _buildActionSection(context, name, userData['email'] ?? ''),
           ],
           if (role == 'ALUNO') ...[
             Text('Olá, $name!', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
