@@ -27,7 +27,7 @@ class _LoginPageState extends State<LoginPage> {
             SizedBox(height: 48),
             TextField(
               controller: userController,
-              decoration: InputDecoration(labelText: 'Usuário (ou E-mail)', border: OutlineInputBorder()),
+              decoration: InputDecoration(labelText: 'E-mail', border: OutlineInputBorder()),
             ),
             SizedBox(height: 16),
             TextField(
@@ -58,7 +58,10 @@ class _LoginPageState extends State<LoginPage> {
               style: ElevatedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 16)),
               child: Text('ENTRAR'),
               onPressed: () {
-                if (userController.text == 'admin' && passController.text == 'admin') {
+                String user = userController.text.trim();
+                String pass = passController.text.trim();
+                
+                if (user == 'admin' && pass == 'admin') {
                   Navigator.pushReplacementNamed(context, '/dashboard', arguments: 'ADMIN');
                 } else {
                   Navigator.pushReplacementNamed(context, '/dashboard', arguments: selectedRole);
