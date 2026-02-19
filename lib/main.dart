@@ -12,8 +12,49 @@ class FitnessApp extends StatelessWidget {
     return MaterialApp(
       title: 'Fitness Platform',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
         useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF00BFA5), // Verde Água / Saúde
+          primary: const Color(0xFF00BFA5),
+          secondary: const Color(0xFF00796B),
+          tertiary: const Color(0xFF26A69A),
+          surface: Colors.white,
+          background: const Color(0xFFF1F8F7),
+        ),
+        scaffoldBackgroundColor: const Color(0xFFF1F8F7),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF00BFA5),
+          foregroundColor: Colors.white,
+          elevation: 0,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF00BFA5),
+            foregroundColor: Colors.white,
+            minimumSize: const Size(double.infinity, 54),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            elevation: 2,
+          ),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFF00BFA5), width: 2),
+          ),
+          labelStyle: const TextStyle(color: Color(0xFF00796B)),
+        ),
       ),
       initialRoute: '/',
       routes: {
