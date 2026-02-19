@@ -65,6 +65,31 @@ class _LoginPageState extends State<LoginPage> {
                 }
               },
             ),
+            SizedBox(height: 32),
+            Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('Não tem conta? '),
+                    TextButton(
+                      onPressed: () => print('Registro de Cliente'),
+                      child: Text('Registre-se como Cliente', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('É Profissional? '),
+                    TextButton(
+                      onPressed: () => print('Registro de Coach'),
+                      child: Text('Registre-se como Coach', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ],
         ),
       ),
