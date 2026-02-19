@@ -3,6 +3,7 @@ import 'pages/common/login_page.dart';
 import 'pages/common/registration_page.dart';
 import 'pages/dashboard/dashboard_page.dart';
 import 'pages/personal/students_page.dart';
+import 'pages/personal/student_detail_page.dart';
 
 void main() {
   runApp(FitnessApp());
@@ -64,6 +65,12 @@ class FitnessApp extends StatelessWidget {
           final args = settings.arguments as Map<String, dynamic>? ?? {};
           return MaterialPageRoute(
             builder: (context) => StudentsPage(coachEmail: args['email'] ?? ''),
+          );
+        }
+        if (settings.name == '/student-detail') {
+          final student = settings.arguments as Map<String, dynamic>? ?? {};
+          return MaterialPageRoute(
+            builder: (context) => StudentDetailPage(student: student),
           );
         }
         return null;

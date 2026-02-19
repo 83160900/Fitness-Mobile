@@ -33,11 +33,18 @@ class _LoginPageState extends State<LoginPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Logo e Boas-vindas
-                  Icon(
-                    Icons.health_and_safety,
-                    size: 80,
-                    color: Theme.of(context).colorScheme.primary,
+                  // Logo e Boas-vindas (Personal Trainer Focus)
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.fitness_center,
+                      size: 80,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Text(

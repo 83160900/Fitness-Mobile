@@ -66,7 +66,7 @@ class _StudentsPageState extends State<StudentsPage> {
                   ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
-                    // Navegar para detalhes do aluno (Visão 360)
+                    Navigator.pushNamed(context, '/student-detail', arguments: student);
                   },
                 ),
               );
