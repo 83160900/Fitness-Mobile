@@ -116,7 +116,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
     setState(() => _isLoading = true);
 
-    final success = await _authService.register({
+    final Map<String, dynamic>? response = await _authService.registerEnhanced({
       'name': nameController.text,
       'email': emailController.text,
       'password': passController.text,
@@ -129,14 +129,15 @@ class _RegisterPageState extends State<RegisterPage> {
 
     setState(() => _isLoading = false);
 
-    if (success) {
+    if (response != null && response['success'] == true) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Conta criada com sucesso! Faça login.')),
       );
       Navigator.pop(context);
     } else {
+      String errorMsg = response?['message'] ?? 'Erro desconhecido ao criar conta.';
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Erro ao criar conta. Tente novamente.')),
+        SnackBar(content: Text('ERRO: $errorMsg'), duration: Duration(seconds: 10)),
       );
     }
   }

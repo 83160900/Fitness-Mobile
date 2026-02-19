@@ -24,6 +24,11 @@ class _StudentsPageState extends State<StudentsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Meus Alunos')),
+      floatingActionButton: FloatingActionButton.extended(
+        icon: const Icon(Icons.person_add_alt_1),
+        label: const Text('Cadastrar Aluno'),
+        onPressed: _openCreateStudentDialog,
+      ),
       body: FutureBuilder<List<dynamic>>(
         future: _studentsFuture,
         builder: (context, snapshot) {
@@ -74,6 +79,74 @@ class _StudentsPageState extends State<StudentsPage> {
           );
         },
       ),
+    );
+  }
+
+  void _openCreateStudentDialog() {
+    final nameCtrl = TextEditingController();
+    final cpfCtrl = TextEditingController();
+    final addressCtrl = TextEditingController();
+    final emailCtrl = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: const Text('Cadastrar Novo Aluno'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: 'Nome completo')),
+                const SizedBox(height: 8),
+                TextField(controller: cpfCtrl, decoration: const InputDecoration(labelText: 'CPF')), 
+                const SizedBox(height: 8),
+                TextField(controller: addressCtrl, decoration: const InputDecoration(labelText: 'Endereço')),
+                const SizedBox(height: 8),
+                TextField(controller: emailCtrl, decoration: const InputDecoration(labelText: 'E-mail')),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
+            ElevatedButton(
+              onPressed: () async {
+                final name = nameCtrl.text.trim();
+                final cpf = cpfCtrl.text.replaceAll(RegExp('[^0-9]'), '');
+                final address = addressCtrl.text.trim();
+                final email = emailCtrl.text.trim();
+                if (name.isEmpty || cpf.isEmpty || email.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Preencha nome, CPF e e-mail.')),
+                  );
+                  return;
+                }
+                Navigator.pop(ctx);
+                final res = await _studentService.createStudent(
+                  name: name,
+                  cpf: cpf,
+                  address: address,
+                  email: email,
+                  coachEmail: widget.coachEmail,
+                );
+                if (res['success'] == true) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Aluno cadastrado com sucesso! Dados enviados por e-mail.')),
+                  );
+                  setState(() {
+                    _studentsFuture = _studentService.getStudents(widget.coachEmail);
+                  });
+                } else {
+                  final msg = res['body']?['message']?.toString() ?? 'Não foi possível cadastrar o aluno.';
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Erro: $msg')),
+                  );
+                }
+              },
+              child: const Text('Cadastrar'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

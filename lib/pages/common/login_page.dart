@@ -69,10 +69,10 @@ class _LoginPageState extends State<LoginPage> {
                   // Campos de Login
                   TextField(
                     controller: userController,
-                    keyboardType: TextInputType.emailAddress,
+                    keyboardType: TextInputType.text,
                     decoration: const InputDecoration(
-                      labelText: 'E-mail',
-                      prefixIcon: Icon(Icons.email_outlined),
+                      labelText: 'CPF ou E-mail',
+                      prefixIcon: Icon(Icons.badge_outlined),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -109,32 +109,6 @@ class _LoginPageState extends State<LoginPage> {
                     child: const Text(
                       'Esqueceu a senha?',
                       style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w600),
-                    ),
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  // Ícones de Identificação (Perfis)
-                  const Text(
-                    'Escolha seu perfil para registrar:',
-                    style: TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _buildRoleIcon(Icons.person, 'Aluno', Colors.blue, 'ALUNO'),
-                        const SizedBox(width: 16),
-                        _buildRoleIcon(Icons.fitness_center, 'Personal', Colors.orange, 'PERSONAL'),
-                        const SizedBox(width: 16),
-                        _buildRoleIcon(Icons.medical_services, 'Fisioterapeuta', Colors.purple, 'FISIOTERAPEUTA'),
-                        const SizedBox(width: 16),
-                        _buildRoleIcon(Icons.self_improvement, 'Quiropraxia', Colors.teal, 'QUIROPRAXISTA'),
-                        const SizedBox(width: 16),
-                        _buildRoleIcon(Icons.apple, 'Nutricionista', Colors.red, 'NUTROLOGO'),
-                      ],
                     ),
                   ),
 
@@ -189,8 +163,17 @@ class _LoginPageState extends State<LoginPage> {
     try {
       final response = await _authService.login(user, pass);
       if (response != null) {
-        // Enviar o objeto completo de resposta para o dashboard
-        Navigator.pushReplacementNamed(context, '/dashboard', arguments: response);
+        final bool forceChange = (response['forcePasswordChange'] == true);
+        if (forceChange) {
+          // Redireciona para troca de senha no primeiro login
+          Navigator.pushNamed(context, '/change-password', arguments: {
+            'identifier': user,
+            'currentPassword': pass,
+          });
+        } else {
+          // Enviar o objeto completo de resposta para o dashboard
+          Navigator.pushReplacementNamed(context, '/dashboard', arguments: response);
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Credenciais inválidas! Verifique e-mail e senha.')),
