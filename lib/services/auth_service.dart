@@ -5,6 +5,7 @@ class AuthService {
   final String baseUrl = 'https://fitness-backtend-production.up.railway.app/api/auth';
 
   Future<Map<String, dynamic>?> login(String email, String password) async {
+    print('Tentando login em: $baseUrl/login com e-mail: $email');
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/login'),
