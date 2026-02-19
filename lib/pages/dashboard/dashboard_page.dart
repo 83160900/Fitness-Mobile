@@ -65,7 +65,7 @@ class _DashboardPageState extends State<DashboardPage> {
           _buildDrawerItem(Icons.dashboard, 'Visão Geral', 0),
           if (role == 'PERSONAL') ...[
             _buildDrawerItem(Icons.groups, 'Meus Alunos', 1),
-            _buildDrawerItem(Icons.trending_up, 'Evolução e Fotos', 2),
+            // _buildDrawerItem(Icons.trending_up, 'Evolução e Fotos', 2),
             _buildDrawerItem(Icons.monitor_weight, 'Bioimpedância', 3),
             _buildDrawerItem(Icons.assignment, 'Planos de Treino', 4),
           ],
@@ -162,8 +162,8 @@ class _DashboardPageState extends State<DashboardPage> {
         const Text('Próximas Ações', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
         _buildModuleCard(context, 'Meus Alunos', Icons.groups, Colors.blue, '/students', {'email': email}),
-        _buildModuleCard(context, 'Gerar Convite', Icons.link, Colors.teal, '/invite', {'email': email}),
-        _buildModuleCard(context, 'Avaliação de Fotos', Icons.camera_alt, Colors.purple, '/photos'),
+        // _buildModuleCard(context, 'Gerar Convite', Icons.link, Colors.teal, '/invite', {'email': email}),
+        // _buildModuleCard(context, 'Avaliação de Fotos', Icons.camera_alt, Colors.purple, '/photos'),
       ],
     );
   }
