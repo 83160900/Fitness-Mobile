@@ -25,7 +25,7 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               SizedBox(height: 80),
               Text(
-                'PLATAFORMA FITNESS',
+                'PLATAFORMA FITNESS V2',
                 style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.blueAccent),
                 textAlign: TextAlign.center,
               ),
