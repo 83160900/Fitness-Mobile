@@ -95,7 +95,7 @@ class FitnessApp extends StatelessWidget {
       },
       routes: {
         '/': (context) => LoginPage(),
-        '/register': (context) => RegistrationPage(),
+        '/register': (context) => RegisterPage(),
         '/dashboard': (context) => DashboardPage(),
         '/change-password': (context) {
           final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>? ?? {};
