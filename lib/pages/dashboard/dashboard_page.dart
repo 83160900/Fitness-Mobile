@@ -17,20 +17,55 @@ class _DashboardPageState extends State<DashboardPage> {
   };
   bool _isLoadingSummary = false;
   int _notificationCount = 0;
+  Map<String, dynamic> _userData = {};
+  bool _isLoadingProfile = true;
 
   @override
   void initState() {
     super.initState();
-    // O carregamento inicial será feito no build ou via post-frame callback para pegar os args
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initUserData();
       _loadSummaryData();
       _loadNotificationCount();
     });
   }
 
+  void _initUserData() {
+    final Map<String, dynamic>? args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+    if (args != null) {
+      setState(() {
+        _userData = Map<String, dynamic>.from(args);
+      });
+      _refreshProfile();
+    }
+  }
+
+  Future<void> _refreshProfile() async {
+    final String userEmail = _userData['email'] ?? '';
+    if (userEmail.isEmpty) return;
+
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/users/profile?email=$userEmail')).timeout(const Duration(seconds: 10));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (mounted) {
+          setState(() {
+            // Atualiza os dados do estado com o que veio do servidor (nome, fotoUrl, etc)
+            _userData['name'] = data['name'] ?? _userData['name'];
+            _userData['photoUrl'] = data['photoUrl'];
+            _userData['phone'] = data['phone'];
+            _userData['address'] = data['address'];
+            _isLoadingProfile = false;
+          });
+        }
+      }
+    } catch (e) {
+      print('Erro ao atualizar perfil no dashboard: $e');
+    }
+  }
+
   Future<void> _loadNotificationCount() async {
-    final Map<String, dynamic> userData = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>? ?? {};
-    final String userEmail = userData['email'] ?? '';
+    final String userEmail = _userData['email'] ?? '';
     if (userEmail.isEmpty) return;
 
     try {
@@ -53,9 +88,8 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Future<void> _loadSummaryData() async {
-    final Map<String, dynamic> userData = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>? ?? {};
-    final String role = userData['role'] ?? '';
-    final String userEmail = userData['email'] ?? '';
+    final String role = _userData['role'] ?? '';
+    final String userEmail = _userData['email'] ?? '';
 
     if (role == 'PERSONAL' && userEmail.isNotEmpty) {
       setState(() => _isLoadingSummary = true);
@@ -80,13 +114,18 @@ class _DashboardPageState extends State<DashboardPage> {
 
   @override
   Widget build(BuildContext context) {
-    final Map<String, dynamic> userData = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>? ?? {};
-    final String role = userData['role'] ?? 'ALUNO';
-    final String name = userData['name'] ?? 'Usuário';
-    final String userEmail = userData['email'] ?? '';
+    // Se _userData ainda estiver vazio (primeiro frame), tenta pegar dos args
+    if (_userData.isEmpty) {
+      final Map<String, dynamic>? args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+      if (args != null) _userData = Map<String, dynamic>.from(args);
+    }
+
+    final String role = _userData['role'] ?? 'ALUNO';
+    final String name = _userData['name'] ?? 'Usuário';
+    final String userEmail = _userData['email'] ?? '';
 
     return Scaffold(
-      drawer: _buildDrawer(context, name, role, userEmail, userData),
+      drawer: _buildDrawer(context, name, role, userEmail, _userData),
       appBar: AppBar(
         title: Text(role == 'PERSONAL' ? 'Dashboard 360°' : 'Meu Painel'),
         actions: [
@@ -95,7 +134,7 @@ class _DashboardPageState extends State<DashboardPage> {
               IconButton(
                 icon: const Icon(Icons.notifications_none_outlined, size: 28),
                 onPressed: () async {
-                  await Navigator.pushNamed(context, '/notifications', arguments: userData);
+                  await Navigator.pushNamed(context, '/notifications', arguments: _userData);
                   _loadNotificationCount();
                 },
               ),
@@ -138,7 +177,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   : NetworkImage('$baseUrl/users/photo/${userData['photoUrl'].toString().split('/').last}')) as ImageProvider
                 : null,
               child: (userData['photoUrl'] == null || userData['photoUrl'].toString().isEmpty)
-                ? Text(name[0], style: TextStyle(fontSize: 24, color: Theme.of(context).colorScheme.primary))
+                ? Text(name.isNotEmpty ? name[0] : 'U', style: TextStyle(fontSize: 24, color: Theme.of(context).colorScheme.primary))
                 : null,
             ),
             decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
@@ -185,7 +224,7 @@ class _DashboardPageState extends State<DashboardPage> {
         color: isSelected ? Theme.of(context).colorScheme.primary : Colors.black87,
       )),
       selected: isSelected,
-      onTap: () {
+      onTap: () async {
         // Log de diagnóstico imediato
         if (route != null) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -196,7 +235,11 @@ class _DashboardPageState extends State<DashboardPage> {
         Navigator.pop(context); // Fecha o menu
         
         if (route != null) {
-          Navigator.pushNamed(context, route, arguments: arguments);
+          final result = await Navigator.pushNamed(context, route, arguments: arguments);
+          // Se voltou da tela de perfil, atualiza os dados locais
+          if (route == '/profile' && result == true) {
+            _refreshProfile();
+          }
         }
         setState(() => _selectedIndex = index);
       },
