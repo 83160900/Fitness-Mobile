@@ -147,23 +147,33 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
     setState(() => _isLoading = true);
 
     // Resolver IDs dos exercícios pelo nome
-    for (var ex in _selectedExercises) {
-      if (ex['exerciseId'] == null) {
-        // Usa busca exata para garantir o ID correto
-        final results = await _workoutService.getExercises(query: ex['name']);
-        if (results.isNotEmpty) {
-          // Procura match exato (ignora case se necessário, mas o catálogo é fixo)
-          try {
+    try {
+      // 1. Garante que todos os exercícios do catálogo existam (redundância de segurança)
+      List<Map<String, String>> allEx = [];
+      _exerciseCatalog.forEach((cat, list) {
+        for (var name in list) {
+          allEx.add({'name': name, 'category': cat});
+        }
+      });
+      await _workoutService.ensureExercises(allEx);
+
+      // 2. Busca IDs para os selecionados
+      for (var ex in _selectedExercises) {
+        if (ex['exerciseId'] == null) {
+          // Tenta busca exata pelo nome para evitar 500 em queries com caracteres especiais se possível
+          // ou simplesmente confia que o 'ensure' acima populou o banco e o search deve funcionar.
+          final results = await _workoutService.getExercises(query: ex['name']);
+          if (results.isNotEmpty) {
             final match = results.firstWhere(
               (element) => element['name'].toString().toLowerCase() == ex['name'].toString().toLowerCase(),
               orElse: () => results.first
             );
             ex['exerciseId'] = match['id'];
-          } catch (e) {
-            ex['exerciseId'] = results.first['id'];
           }
         }
       }
+    } catch (e) {
+      print('[DEBUG_LOG] Erro ao resolver IDs: $e');
     }
 
     // Filtra exercícios que ainda não possuem ID (falha de segurança)
