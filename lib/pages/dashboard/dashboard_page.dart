@@ -16,7 +16,7 @@ class _DashboardPageState extends State<DashboardPage> {
     final String userEmail = userData['email'] ?? '';
 
     return Scaffold(
-      drawer: _buildDrawer(context, name, role),
+      drawer: _buildDrawer(context, name, role, userEmail),
       appBar: AppBar(
         title: Text(role == 'PERSONAL' ? 'Dashboard 360°' : 'Meu Painel'),
         actions: [
@@ -49,7 +49,7 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Widget _buildDrawer(BuildContext context, String name, String role) {
+  Widget _buildDrawer(BuildContext context, String name, String role, String userEmail) {
     return Drawer(
       child: Column(
         children: [
