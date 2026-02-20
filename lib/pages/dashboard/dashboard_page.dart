@@ -340,7 +340,6 @@ class _DashboardPageState extends State<DashboardPage> {
         const Text('Próximas Ações', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         const SizedBox(height: 16),
         _buildModuleCard(context, 'Meus Alunos', Icons.groups, const Color(0xFF0F2A3D), '/students', userData),
-        _buildModuleCard(context, 'Nova Avaliação', Icons.monitor_weight, const Color(0xFF1F6F5C), '/bioimpedance-students', userData),
         _buildModuleCard(context, 'Minha Agenda', Icons.calendar_month, const Color(0xFF0F2A3D), '/schedule', userData),
       ],
     );
