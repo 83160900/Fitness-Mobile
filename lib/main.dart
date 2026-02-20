@@ -147,5 +147,5 @@ class FitnessApp extends StatelessWidget {
   }
 }
 // Test commit to verify configuration
-// Test commit to verify configuration (fixed)
+// Test commit to verify configuration (fixed v2)
 
