@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:fitness_mobile/widgets/themed_icon_card.dart';
 import 'package:intl/intl.dart';
 
 class NotificationsPage extends StatefulWidget {
@@ -161,9 +162,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         elevation: isRead ? 0 : 2,
                         color: isRead ? Colors.grey[50] : Colors.white,
                         child: ExpansionTile(
-                          leading: Icon(
-                            notif['type'] == 'RESERVA' ? Icons.event : Icons.notifications,
-                            color: isRead ? Colors.grey : Theme.of(context).primaryColor,
+                          leading: ThemedIconCard(
+                            icon: notif['type'] == 'RESERVA' ? Icons.event : Icons.notifications,
+                            size: 40,
+                            filled: false,
                           ),
                           title: Text(
                             notif['title'] ?? 'Notificação',

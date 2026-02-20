@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:fitness_mobile/widgets/themed_icon_card.dart';
 
 class DashboardPage extends StatefulWidget {
   @override
@@ -340,14 +341,17 @@ class _DashboardPageState extends State<DashboardPage> {
 
   Widget _buildModuleCard(BuildContext context, String title, IconData icon, Color color, [String? route, Object? args]) {
     return Card(
-      elevation: 2,
+      elevation: 0,
       margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: const BorderSide(color: Color(0xFFD1D5DB), width: 1),
+      ),
       child: ListTile(
-        leading: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
-          child: Icon(icon, color: color),
+        leading: ThemedIconCard(
+          icon: icon,
+          size: 40,
+          filled: false,
         ),
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
         trailing: const Icon(Icons.chevron_right, size: 20),
