@@ -64,7 +64,7 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
           _buildDrawerItem(Icons.dashboard, 'Visão Geral', 0),
           if (role == 'PERSONAL') ...[
-            _buildDrawerItem(Icons.groups, 'Meus Alunos', 1),
+            _buildDrawerItem(Icons.groups, 'Meus Alunos', 1, route: '/students', arguments: {'email': userEmail}),
             // _buildDrawerItem(Icons.trending_up, 'Evolução e Fotos', 2),
             _buildDrawerItem(Icons.monitor_weight, 'Bioimpedância', 3, route: '/bioimpedance-students'),
             _buildDrawerItem(Icons.assignment, 'Planos de Treino', 4),
@@ -86,7 +86,7 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Widget _buildDrawerItem(IconData icon, String title, int index, {String? route}) {
+  Widget _buildDrawerItem(IconData icon, String title, int index, {String? route, Object? arguments}) {
     return ListTile(
       leading: Icon(icon, color: _selectedIndex == index ? Theme.of(context).colorScheme.primary : Colors.grey),
       title: Text(title, style: TextStyle(fontWeight: _selectedIndex == index ? FontWeight.bold : FontWeight.normal)),
@@ -95,7 +95,7 @@ class _DashboardPageState extends State<DashboardPage> {
         setState(() => _selectedIndex = index);
         Navigator.pop(context); // Fecha drawer
         if (route != null) {
-          Navigator.pushNamed(context, route);
+          Navigator.pushNamed(context, route, arguments: arguments);
         }
       },
     );
