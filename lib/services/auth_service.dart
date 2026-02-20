@@ -79,4 +79,10 @@ class AuthService {
       return false;
     }
   }
+
+  Future<Map<String, dynamic>?> getCurrentUser() async {
+    // Implementação básica de retorno de usuário para não quebrar a Bioimpedância
+    // Em um cenário real, isso leria do SharedPreferences ou SecureStorage
+    return null; 
+  }
 }

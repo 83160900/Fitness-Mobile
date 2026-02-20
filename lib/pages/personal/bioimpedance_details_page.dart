@@ -305,7 +305,7 @@ class _BioimpedanceDetailsPageState extends State<BioimpedanceDetailsPage> with 
           const SizedBox(height: 20),
           Card(
             color: Colors.teal[50],
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.teal[200]!)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Colors.teal[200]!)),
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: Text(analysis, style: const TextStyle(fontSize: 15, height: 1.5, fontStyle: FontStyle.italic)),
