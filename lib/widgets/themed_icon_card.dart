@@ -1,16 +1,12 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 
-/// ThemedIconCard
-/// Um widget padronizado para exibir ícones no estilo "icon-card"
-/// respeitando a paleta Navy/Emerald do app.
-///
-/// Pode ser usado com/sem label e em dois tamanhos (small/medium).
 class ThemedIconCard extends StatelessWidget {
-  final String? category; // ex: membros-inferiores, core, funcional, maquinas, mobilidade, reabilitacao
-  final IconData? icon;   // fallback quando não for categoria mapeada
-  final String? label;    // rótulo opcional
-  final double size;      // tamanho do círculo do ícone (40=small, 56=medium)
-  final bool filled;      // se true, usa fundo sólido; senão, leve
+  final String? category; 
+  final IconData? icon;   
+  final String? label;    
+  final double size;      
+  final bool filled;      
 
   const ThemedIconCard({
     super.key,
@@ -21,81 +17,120 @@ class ThemedIconCard extends StatelessWidget {
     this.filled = false,
   });
 
-  Color get _primary => const Color(0xFF0F2A3D);
-  Color get _secondary => const Color(0xFF1F6F5C);
-  Color get _border => const Color(0xFFD1D5DB);
-
   @override
   Widget build(BuildContext context) {
-    final resolvedIcon = icon ?? _iconForCategory(category);
-    final scheme = Theme.of(context).colorScheme;
-
-    final bg = filled
-        ? _secondary
-        : _secondary.withOpacity(0.10);
-    final fg = filled
-        ? Colors.white
-        : _secondary;
-
-    final widgetIcon = Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(12),
-        border: filled ? null : Border.all(color: _border),
-      ),
-      alignment: Alignment.center,
-      child: Icon(resolvedIcon, color: fg, size: size * 0.5),
-    );
-
-    if (label == null || label!.isEmpty) {
-      return widgetIcon;
-    }
-
+    final Map<String, dynamic> style = _getStyleForCategory(category, icon);
+    final IconData resolvedIcon = style['icon'];
+    final Color baseColor = style['color'];
+    
+    // Design Glassmorphism / Premium
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        widgetIcon,
-        const SizedBox(height: 8),
-        SizedBox(
-          width: size * 2,
-          child: Text(
-            label!,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: scheme.onBackground,
+        Container(
+          width: size * 1.4,
+          height: size * 1.4,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                baseColor.withOpacity(0.2),
+                baseColor.withOpacity(0.05),
+              ],
             ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
+            border: Border.all(
+              color: baseColor.withOpacity(0.3),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: baseColor.withOpacity(0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+              child: Center(
+                child: Icon(
+                  resolvedIcon,
+                  color: baseColor,
+                  size: size * 0.7,
+                ),
+              ),
+            ),
           ),
         ),
+        if (label != null) ...[
+          const SizedBox(height: 10),
+          SizedBox(
+            width: size * 2.2,
+            child: Text(
+              label!,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF0F2A3D),
+                letterSpacing: -0.5,
+              ),
+              maxLines: 2,
+            ),
+          ),
+        ],
       ],
     );
   }
 
-  IconData _iconForCategory(String? cat) {
+  Map<String, dynamic> _getStyleForCategory(String? cat, IconData? fallbackIcon) {
     switch ((cat ?? '').toLowerCase()) {
       case 'membros-inferiores':
-        return Icons.directions_run; // sugestão: perna/agachamento
+        return {
+          'icon': Icons.airline_seat_legroom_extra, 
+          'color': Colors.orange[700]!,
+        };
       case 'membros-superiores':
-        return Icons.fitness_center; // halteres
+        return {
+          'icon': Icons.fitness_center,
+          'color': const Color(0xFF1F6F5C),
+        };
       case 'core':
-        return Icons.self_improvement; // postura/core
+        return {
+          'icon': Icons.accessibility_new,
+          'color': Colors.blue[600]!,
+        };
       case 'funcional':
       case 'funcional / cardio':
-        return Icons.timer; // cardio/funcional
+        return {
+          'icon': Icons.bolt,
+          'color': Colors.amber[800]!,
+        };
       case 'maquinas':
-        return Icons.precision_manufacturing; // máquinas
+        return {
+          'icon': Icons.settings_input_component,
+          'color': Colors.blueGrey[700]!,
+        };
       case 'mobilidade':
-        return Icons.accessibility_new; // alongamento/mobilidade
+        return {
+          'icon': Icons.self_improvement,
+          'color': Colors.purple[400]!,
+        };
       case 'reabilitacao':
       case 'reabilitação':
-        return Icons.healing; // reabilitação
+        return {
+          'icon': Icons.medical_services,
+          'color': Colors.red[400]!,
+        };
       default:
-        return Icons.apps; // genérico
+        return {
+          'icon': fallbackIcon ?? Icons.grid_view_rounded,
+          'color': const Color(0xFF1F6F5C),
+        };
     }
   }
 }

@@ -272,17 +272,17 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       crossAxisCount: 3,
-      mainAxisSpacing: 12,
-      crossAxisSpacing: 12,
-      childAspectRatio: 0.85,
+      mainAxisSpacing: 16,
+      crossAxisSpacing: 16,
+      childAspectRatio: 0.75, // Ajustado para acomodar o novo design
       children: _exerciseCatalog.keys.map((cat) {
         return InkWell(
           onTap: () => _openExerciseCategory(cat),
+          borderRadius: BorderRadius.circular(20),
           child: ThemedIconCard(
             category: cat,
             label: cat,
-            size: 56,
-            filled: false,
+            size: 48,
           ),
         );
       }).toList(),

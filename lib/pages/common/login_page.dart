@@ -38,7 +38,6 @@ class _LoginPageState extends State<LoginPage> {
                   const ThemedIconCard(
                     icon: Icons.fitness_center,
                     size: 80,
-                    filled: true,
                   ),
                   const SizedBox(height: 16),
                   Text(
