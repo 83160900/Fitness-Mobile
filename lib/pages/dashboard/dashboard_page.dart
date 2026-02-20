@@ -338,10 +338,10 @@ class _DashboardPageState extends State<DashboardPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text('Próximas Ações', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 12),
-        _buildModuleCard(context, 'Meus Alunos', Icons.groups, Colors.blue, '/students', userData),
-        // _buildModuleCard(context, 'Gerar Convite', Icons.link, Colors.teal, '/invite', {'email': email}),
-        // _buildModuleCard(context, 'Avaliação de Fotos', Icons.camera_alt, Colors.purple, '/photos'),
+        const SizedBox(height: 16),
+        _buildModuleCard(context, 'Meus Alunos', Icons.groups, const Color(0xFF0F2A3D), '/students', userData),
+        _buildModuleCard(context, 'Nova Avaliação', Icons.monitor_weight, const Color(0xFF1F6F5C), '/bioimpedance-students', userData),
+        _buildModuleCard(context, 'Minha Agenda', Icons.calendar_month, const Color(0xFF0F2A3D), '/schedule', userData),
       ],
     );
   }
@@ -355,9 +355,10 @@ class _DashboardPageState extends State<DashboardPage> {
         side: const BorderSide(color: Color(0xFFD1D5DB), width: 1),
       ),
       child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         leading: ThemedIconCard(
           icon: icon,
-          size: 40,
+          size: 42, 
           filled: false,
         ),
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),

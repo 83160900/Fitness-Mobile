@@ -29,20 +29,20 @@ class ThemedIconCard extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: size * 1.3,
-          height: size * 1.3,
+          width: size, // Ajustado para ser exatamente o tamanho solicitado
+          height: size, // Ajustado para ser exatamente o tamanho solicitado
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8), // "Sharp" (menos arredondado)
             color: Colors.white,
             border: Border.all(
               color: baseColor.withOpacity(0.5),
-              width: 1.5,
+              width: 1.2,
             ),
             boxShadow: [
               BoxShadow(
-                color: baseColor.withOpacity(0.1),
+                color: baseColor.withOpacity(0.08),
                 blurRadius: 4,
-                offset: const Offset(2, 2),
+                offset: const Offset(1, 1),
               ),
             ],
           ),
@@ -52,14 +52,14 @@ class ThemedIconCard extends StatelessWidget {
               // Efeito "Duotone" simulado (camada de fundo suave)
               FaIcon(
                 resolvedIcon,
-                color: baseColor.withOpacity(0.15),
-                size: size * 0.75,
+                color: baseColor.withOpacity(0.12),
+                size: size * 0.65,
               ),
               // Ícone Principal (Sharp)
               FaIcon(
                 resolvedIcon,
                 color: baseColor,
-                size: size * 0.55,
+                size: size * 0.45,
               ),
             ],
           ),

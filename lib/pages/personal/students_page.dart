@@ -46,6 +46,10 @@ class _StudentsPageState extends State<StudentsPage> {
             separatorBuilder: (_, __) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
               final student = students[index];
+              final String name = student['name'] ?? 'Aluno';
+              final String? photoUrl = student['photoUrl'];
+              final bool hasPhoto = photoUrl != null && photoUrl.isNotEmpty && !photoUrl.contains('pravatar.cc');
+
               return Card(
                 elevation: 0,
                 shape: RoundedRectangleBorder(
@@ -54,12 +58,31 @@ class _StudentsPageState extends State<StudentsPage> {
                 ),
                 child: ListTile(
                   contentPadding: const EdgeInsets.all(12),
-                  leading: CircleAvatar(
-                    radius: 30,
-                    backgroundImage: NetworkImage(student['photoUrl'] ?? 'https://i.pravatar.cc/150'),
+                  leading: Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: hasPhoto ? Colors.transparent : const Color(0xFF1F6F5C).withOpacity(0.1),
+                      border: Border.all(color: const Color(0xFFD1D5DB)),
+                      image: hasPhoto ? DecorationImage(
+                        image: NetworkImage(photoUrl),
+                        fit: BoxFit.cover,
+                      ) : null,
+                    ),
+                    child: !hasPhoto ? Center(
+                      child: Text(
+                        name.isNotEmpty ? name[0].toUpperCase() : 'A',
+                        style: const TextStyle(
+                          fontSize: 24, 
+                          fontWeight: FontWeight.bold, 
+                          color: Color(0xFF1F6F5C)
+                        ),
+                      ),
+                    ) : null,
                   ),
                   title: Text(
-                    student['name'],
+                    name,
                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   subtitle: const Column(
