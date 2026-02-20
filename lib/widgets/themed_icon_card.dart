@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class ThemedIconCard extends StatelessWidget {
   final String? category; 
@@ -23,61 +24,58 @@ class ThemedIconCard extends StatelessWidget {
     final IconData resolvedIcon = style['icon'];
     final Color baseColor = style['color'];
     
-    // Design Glassmorphism / Premium
+    // Design "Sharp" (Bordas mais retas e profissionais)
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: size * 1.4,
-          height: size * 1.4,
+          width: size * 1.3,
+          height: size * 1.3,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                baseColor.withOpacity(0.2),
-                baseColor.withOpacity(0.05),
-              ],
-            ),
+            borderRadius: BorderRadius.circular(8), // "Sharp" (menos arredondado)
+            color: Colors.white,
             border: Border.all(
-              color: baseColor.withOpacity(0.3),
+              color: baseColor.withOpacity(0.5),
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
                 color: baseColor.withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
+                blurRadius: 4,
+                offset: const Offset(2, 2),
               ),
             ],
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-              child: Center(
-                child: Icon(
-                  resolvedIcon,
-                  color: baseColor,
-                  size: size * 0.7,
-                ),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // Efeito "Duotone" simulado (camada de fundo suave)
+              FaIcon(
+                resolvedIcon,
+                color: baseColor.withOpacity(0.15),
+                size: size * 0.75,
               ),
-            ),
+              // Ícone Principal (Sharp)
+              FaIcon(
+                resolvedIcon,
+                color: baseColor,
+                size: size * 0.55,
+              ),
+            ],
           ),
         ),
         if (label != null) ...[
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           SizedBox(
-            width: size * 2.2,
+            width: size * 2.5,
             child: Text(
-              label!,
+              label!.toUpperCase(),
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
+                fontSize: 11,
+                fontWeight: FontWeight.w900,
                 color: const Color(0xFF0F2A3D),
-                letterSpacing: -0.5,
+                letterSpacing: 1.0,
               ),
               maxLines: 2,
             ),
@@ -91,44 +89,44 @@ class ThemedIconCard extends StatelessWidget {
     switch ((cat ?? '').toLowerCase()) {
       case 'membros-inferiores':
         return {
-          'icon': Icons.airline_seat_legroom_extra, 
-          'color': Colors.orange[700]!,
+          'icon': FontAwesomeIcons.personRunning, 
+          'color': const Color(0xFFE67E22), // Laranja Profissional
         };
       case 'membros-superiores':
         return {
-          'icon': Icons.fitness_center,
-          'color': const Color(0xFF1F6F5C),
+          'icon': FontAwesomeIcons.dumbbell,
+          'color': const Color(0xFF1F6F5C), // Verde Esmeralda
         };
       case 'core':
         return {
-          'icon': Icons.accessibility_new,
-          'color': Colors.blue[600]!,
+          'icon': FontAwesomeIcons.userNinja,
+          'color': const Color(0xFF2980B9), // Azul Focado
         };
       case 'funcional':
       case 'funcional / cardio':
         return {
-          'icon': Icons.bolt,
-          'color': Colors.amber[800]!,
+          'icon': FontAwesomeIcons.bolt,
+          'color': const Color(0xFFF1C40F), // Amarelo Energia
         };
       case 'maquinas':
         return {
-          'icon': Icons.settings_input_component,
-          'color': Colors.blueGrey[700]!,
+          'icon': FontAwesomeIcons.gear,
+          'color': const Color(0xFF34495E), // Cinza Máquina
         };
       case 'mobilidade':
         return {
-          'icon': Icons.self_improvement,
-          'color': Colors.purple[400]!,
+          'icon': FontAwesomeIcons.personWalking,
+          'color': const Color(0xFF9B59B6), // Roxo Flexibilidade
         };
       case 'reabilitacao':
       case 'reabilitação':
         return {
-          'icon': Icons.medical_services,
-          'color': Colors.red[400]!,
+          'icon': FontAwesomeIcons.kitMedical,
+          'color': const Color(0xFFE74C3C), // Vermelho Cuidado
         };
       default:
         return {
-          'icon': fallbackIcon ?? Icons.grid_view_rounded,
+          'icon': fallbackIcon ?? FontAwesomeIcons.folderOpen,
           'color': const Color(0xFF1F6F5C),
         };
     }
