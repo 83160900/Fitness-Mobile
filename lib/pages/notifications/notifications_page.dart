@@ -55,6 +55,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
     }
   }
 
+  Future<void> _markAsArchived(String id) async {
+    try {
+      // Usamos um endpoint que mude o status para ARQUIVADA
+      await http.post(Uri.parse('$baseUrl/notifications/$id/archive'));
+    } catch (e) {
+      print('Erro ao arquivar: $e');
+    }
+  }
+
   Future<void> _confirmReserva(dynamic notificationId, dynamic slotId, bool confirm) async {
     if (slotId == null) {
       print('[DEBUG_LOG] Erro: slotId está nulo na notificação');
@@ -86,9 +95,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
       print('[DEBUG_LOG] Resposta servidor: ${response.statusCode} - ${response.body}');
       
       if (response.statusCode == 200) {
-        // Se confirmou/recusou com sucesso, marca a notificação como LIDA/ARQUIVADA
+        // Se confirmou/recusou com sucesso, marca a notificação como ARQUIVADA (Personal)
+        // Isso fará sumir os botões na próxima carga
         if (notificationId != null) {
-          await _markAsRead(notificationId.toString());
+          await _markAsArchived(notificationId.toString());
         }
         
         ScaffoldMessenger.of(context).showSnackBar(
@@ -179,25 +189,46 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                     const SizedBox(height: 16),
                                     Wrap(
                                       alignment: WrapAlignment.end,
-                                      spacing: 8,
+                                      spacing: 12,
+                                      runSpacing: 8,
                                       children: [
-                                        // Botão de Recusar
-                                        TextButton.icon(
-                                          onPressed: () => _confirmReserva(notif['id'], notif['slotId'], false),
-                                          icon: const Icon(Icons.cancel, color: Colors.red, size: 20),
-                                          label: const Text('RECUSAR', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-                                        ),
-                                        // Botão de Confirmar
-                                        ElevatedButton.icon(
-                                          onPressed: () => _confirmReserva(notif['id'], notif['slotId'], true),
-                                          icon: const Icon(Icons.check_circle, color: Colors.white, size: 20),
-                                          label: const Text('CONFIRMAR', style: TextStyle(fontWeight: FontWeight.bold)),
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors.green,
-                                            foregroundColor: Colors.white,
-                                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                        // Botão de Recusar (visível em todos os status de reserva não cancelados)
+                                        if (notif['status'] != 'ARQUIVADA')
+                                          SizedBox(
+                                            height: 40,
+                                            width: 130,
+                                            child: ElevatedButton.icon(
+                                              onPressed: () => _confirmReserva(notif['id'], notif['slotId'], false),
+                                              icon: const Icon(Icons.cancel, size: 18),
+                                              label: const Text('RECUSAR', style: TextStyle(fontWeight: FontWeight.bold)),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Colors.redAccent,
+                                                foregroundColor: Colors.white,
+                                                elevation: 0,
+                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                              ),
+                                            ),
                                           ),
-                                        ),
+                                        
+                                        // Botão de Confirmar (Só aparece se NÃO estiver confirmada ainda ou status pendente)
+                                        // Se o status for LIDA (após primeira abertura) ou PENDENTE, mostramos
+                                        // Se for um status customizado que indica já confirmado, ocultamos.
+                                        if (notif['status'] == 'PENDENTE' || notif['status'] == null)
+                                          SizedBox(
+                                            height: 40,
+                                            width: 130,
+                                            child: ElevatedButton.icon(
+                                              onPressed: () => _confirmReserva(notif['id'], notif['slotId'], true),
+                                              icon: const Icon(Icons.check_circle, size: 18),
+                                              label: const Text('CONFIRMAR', style: TextStyle(fontWeight: FontWeight.bold)),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Colors.green,
+                                                foregroundColor: Colors.white,
+                                                elevation: 0,
+                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                              ),
+                                            ),
+                                          ),
                                       ],
                                     )
                                   ]
