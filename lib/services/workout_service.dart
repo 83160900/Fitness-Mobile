@@ -49,4 +49,16 @@ class WorkoutService {
       return [];
     }
   }
+
+  Future<void> ensureExercises(List<Map<String, String>> exercises) async {
+    try {
+      await http.post(
+        Uri.parse('$baseUrl/exercises/ensure'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(exercises),
+      );
+    } catch (e) {
+      print('Erro ao garantir exercícios: $e');
+    }
+  }
 }
