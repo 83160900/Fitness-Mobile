@@ -15,15 +15,15 @@ class _SchedulePageState extends State<SchedulePage> {
   bool _isLoading = false;
   String? _userRole;
   String? _userEmail;
+  String? _userName;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     _userEmail = args?['email'];
-    // Em um app real buscaríamos a role do estado global ou storage
-    // Por enquanto vamos assumir a partir dos argumentos ou default
-    _userRole = args?['role'] ?? 'PERSONAL'; 
+    _userRole = args?['role'] ?? 'ALUNO'; 
+    _userName = args?['name'] ?? 'Aluno';
     _loadSlots();
   }
 
@@ -35,6 +35,8 @@ class _SchedulePageState extends State<SchedulePage> {
     final end = start.add(const Duration(days: 1));
 
     try {
+      // Nota: Para o aluno, buscaríamos a agenda do Personal dele. 
+      // Por simplicidade neste MVP, estamos usando o próprio e-mail para teste.
       final response = await http.get(Uri.parse(
         '$baseUrl/schedule/personal/$_userEmail?start=${start.toIso8601String()}&end=${end.toIso8601String()}'
       ));
@@ -51,60 +53,22 @@ class _SchedulePageState extends State<SchedulePage> {
     }
   }
 
-  void _reserveSlot(DateTime time) async {
-    // Diálogo de reserva
-    String recurrence = 'NENHUMA';
-    
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Reservar Horário'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Horário: ${DateFormat('HH:mm').format(time)}'),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              value: recurrence,
-              decoration: const InputDecoration(labelText: 'Recorrência'),
-              items: ['NENHUMA', 'DIARIA', 'QUINZENAL', 'MENSAL'].map((r) => 
-                DropdownMenuItem(value: r, child: Text(r))).toList(),
-              onChanged: (v) => recurrence = v!,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('CANCELAR')),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              await _doReserve(time, recurrence);
-            },
-            child: const Text('RESERVAR'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _doReserve(DateTime time, String recurrence) async {
+  Future<void> _doReserve(DateTime time) async {
     setState(() => _isLoading = true);
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/schedule/reserve'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'personalEmail': _userEmail, // Em visão de aluno seria o email do personal dele
+          'personalEmail': _userEmail, 
           'studentEmail': _userEmail, 
           'startTime': time.toIso8601String(),
-          'recurrence': recurrence,
+          'recurrence': 'NENHUMA',
         }),
       );
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Reserva realizada! Aguarde confirmação.')));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Horário reservado!')));
         _loadSlots();
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(response.body)));
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao reservar.')));
@@ -114,105 +78,174 @@ class _SchedulePageState extends State<SchedulePage> {
 
   @override
   Widget build(BuildContext context) {
+    bool isPersonal = _userRole == 'PERSONAL';
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Minha Agenda')),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: Text(isPersonal ? 'Gestão de Agenda' : 'Marcar Aula'),
+        elevation: 0,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+      ),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildCalendarStrip(),
-          const Divider(),
+          _buildHeader(),
+          _buildDateSelector(),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            child: Divider(),
+          ),
           Expanded(
             child: _isLoading 
               ? const Center(child: CircularProgressIndicator())
-              : _buildTimeList(),
+              : isPersonal ? _buildPersonalGrid() : _buildStudentList(),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildCalendarStrip() {
-    return Container(
-      height: 100,
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: 14, // 2 semanas
-        itemBuilder: (context, index) {
-          final day = DateTime.now().add(Duration(days: index));
-          final isSelected = day.day == _selectedDate.day && day.month == _selectedDate.month;
-          return GestureDetector(
-            onTap: () {
-              setState(() => _selectedDate = day);
-              _loadSlots();
-            },
-            child: Container(
-              width: 60,
-              margin: const EdgeInsets.symmetric(horizontal: 8),
-              decoration: BoxDecoration(
-                color: isSelected ? Colors.teal : Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: isSelected ? Colors.teal : Colors.grey[300]!),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(DateFormat('E').format(day), style: TextStyle(color: isSelected ? Colors.white : Colors.grey)),
-                  Text(day.day.toString(), style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: isSelected ? Colors.white : Colors.black)),
-                ],
-              ),
-            ),
-          );
-        },
+  Widget _buildHeader() {
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Row(
+        children: [
+          Icon(_userRole == 'PERSONAL' ? Icons.psychology : Icons.person, color: Colors.teal, size: 28),
+          const SizedBox(width: 12),
+          Text(
+            _userRole == 'PERSONAL' ? 'Minha Disponibilidade' : '👤 $_userName',
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildTimeList() {
-    // Gerar horários de 06:00 as 22:00
-    final List<DateTime> times = [];
+  Widget _buildDateSelector() {
+    String dayName = DateFormat('EEEE', 'pt_BR').format(_selectedDate);
+    dayName = dayName[0].toUpperCase() + dayName.substring(1);
+    final String dateStr = DateFormat('dd/MM').format(_selectedDate);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: InkWell(
+        onTap: () async {
+          final date = await showDatePicker(
+            context: context,
+            initialDate: _selectedDate,
+            firstDate: DateTime.now(),
+            lastDate: DateTime.now().add(const Duration(days: 30)),
+          );
+          if (date != null) {
+            setState(() => _selectedDate = date);
+            _loadSlots();
+          }
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          decoration: BoxDecoration(
+            color: Colors.teal.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.calendar_today, size: 18, color: Colors.teal),
+              const SizedBox(width: 10),
+              Text('📅 $dayName $dateStr', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+              const Icon(Icons.arrow_drop_down),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStudentList() {
+    // Lista simplificada para o Aluno (☐ 06:00)
+    final List<DateTime> availableTimes = [];
     for (int h = 6; h <= 22; h++) {
-      times.add(DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day, h, 0));
+      final time = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day, h, 0);
+      final slot = _slots.firstWhere((s) => DateTime.parse(s['startTime']).hour == h, orElse: () => null);
+      
+      // Oculta se estiver ocupado (RESERVADO ou CONFIRMADO)
+      if (slot == null || slot['status'] == 'CANCELADO') {
+        availableTimes.add(time);
+      }
+    }
+
+    if (availableTimes.isEmpty) {
+      return const Center(child: Text('Nenhum horário disponível para este dia.'));
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: times.length,
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      itemCount: availableTimes.length,
       itemBuilder: (context, index) {
-        final time = times[index];
-        final slot = _slots.firstWhere((s) => DateTime.parse(s['startTime']).hour == time.hour, orElse: () => null);
-        
-        return _buildTimeCard(time, slot);
+        final time = availableTimes[index];
+        return ListTile(
+          leading: const Icon(Icons.check_box_outline_blank, color: Colors.grey),
+          title: Text(DateFormat('HH:mm').format(time), style: const TextStyle(fontSize: 18)),
+          onTap: () => _confirmReservation(time),
+        );
       },
     );
   }
 
-  Widget _buildTimeCard(DateTime time, dynamic slot) {
-    String status = slot != null ? slot['status'] : 'LIVRE';
-    Color color = Colors.grey[200]!;
-    String label = 'Disponível';
-
-    if (status == 'RESERVADO') {
-      color = Colors.yellow[100]!;
-      label = 'Reservado';
-    } else if (status == 'CONFIRMADO') {
-      color = Colors.green[100]!;
-      label = 'Confirmado';
-    } else if (status == 'CANCELADO') {
-      color = Colors.red[100]!;
-      label = 'Cancelado';
-    }
-
-    return Card(
-      color: color,
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        leading: Text(DateFormat('HH:mm').format(time), style: const TextStyle(fontWeight: FontWeight.bold)),
-        title: Text(label),
-        subtitle: slot != null ? Text('Status: $status') : null,
-        trailing: (status == 'LIVRE' || status == 'CANCELADO') 
-          ? ElevatedButton(onPressed: () => _reserveSlot(time), child: const Text('MARCAR'))
-          : null,
+  void _confirmReservation(DateTime time) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmar Reserva'),
+        content: Text('Deseja marcar sua aula para às ${DateFormat('HH:mm').format(time)}?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('NÃO')),
+          ElevatedButton(onPressed: () { Navigator.pop(context); _doReserve(time); }, child: const Text('SIM')),
+        ],
       ),
+    );
+  }
+
+  Widget _buildPersonalGrid() {
+    // Visão Inteligente para o Personal: Grid compacto
+    return GridView.builder(
+      padding: const EdgeInsets.all(20),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        childAspectRatio: 1.5,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+      ),
+      itemCount: 17, // 06:00 as 22:00
+      itemBuilder: (context, index) {
+        int hour = 6 + index;
+        final slot = _slots.firstWhere((s) => DateTime.parse(s['startTime']).hour == hour, orElse: () => null);
+        
+        String status = slot != null ? slot['status'] : 'LIVRE';
+        Color color = Colors.grey[100]!;
+        Color textColor = Colors.black54;
+
+        if (status == 'RESERVADO') { color = Colors.yellow[400]!; textColor = Colors.black; }
+        else if (status == 'CONFIRMADO') { color = Colors.green[400]!; textColor = Colors.white; }
+        else if (status == 'CANCELADO') { color = Colors.red[400]!; textColor = Colors.white; }
+
+        return Container(
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('${hour.toString().padLeft(2, '0')}:00', style: TextStyle(fontWeight: FontWeight.bold, color: textColor)),
+              if (slot != null && slot['studentEmail'] != null)
+                Text(slot['studentEmail'].split('@')[0], style: TextStyle(fontSize: 10, color: textColor), overflow: TextOverflow.ellipsis),
+            ],
+          ),
+        );
+      },
     );
   }
 }
