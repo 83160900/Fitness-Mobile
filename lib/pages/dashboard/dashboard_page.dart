@@ -16,6 +16,7 @@ class _DashboardPageState extends State<DashboardPage> {
     'goalProgress': '...',
   };
   bool _isLoadingSummary = false;
+  int _notificationCount = 0;
 
   @override
   void initState() {
@@ -23,7 +24,26 @@ class _DashboardPageState extends State<DashboardPage> {
     // O carregamento inicial será feito no build ou via post-frame callback para pegar os args
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadSummaryData();
+      _loadNotificationCount();
     });
+  }
+
+  Future<void> _loadNotificationCount() async {
+    final Map<String, dynamic> userData = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>? ?? {};
+    final String userEmail = userData['email'] ?? '';
+    if (userEmail.isEmpty) return;
+
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/notifications?email=$userEmail&status=PENDENTE')).timeout(const Duration(seconds: 10));
+      if (response.statusCode == 200) {
+        final List<dynamic> notifs = jsonDecode(response.body);
+        setState(() {
+          _notificationCount = notifs.length;
+        });
+      }
+    } catch (e) {
+      print('Erro ao carregar contagem de notificações: $e');
+    }
   }
 
   Future<void> _loadSummaryData() async {
@@ -68,22 +88,26 @@ class _DashboardPageState extends State<DashboardPage> {
             children: [
               IconButton(
                 icon: const Icon(Icons.notifications_none_outlined, size: 28),
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Notificações e Mensagens')),
-                  );
+                onPressed: () async {
+                  await Navigator.pushNamed(context, '/notifications', arguments: userData);
+                  _loadNotificationCount();
                 },
               ),
-              Positioned(
-                right: 8,
-                top: 8,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
-                  constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-                  child: Text('2', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
-                ),
-              )
+              if (_notificationCount > 0)
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                    constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                    child: Text(
+                      '$_notificationCount',
+                      style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                )
             ],
           ),
           const SizedBox(width: 8),

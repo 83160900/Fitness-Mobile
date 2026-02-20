@@ -10,6 +10,7 @@ import 'pages/personal/bioimpedance_details_page.dart';
 import 'pages/personal/schedule_page.dart';
 import 'pages/personal/invite_page.dart';
 import 'pages/personal/create_workout_page.dart';
+import 'pages/notifications/notifications_page.dart';
 
 void main() {
   runApp(FitnessApp());
@@ -108,6 +109,7 @@ class FitnessApp extends StatelessWidget {
         '/dashboard': (context) => DashboardPage(),
         '/bioimpedance-students': (context) => BioimpedanceStudentsPage(),
         '/schedule': (context) => SchedulePage(),
+        '/notifications': (context) => NotificationsPage(),
         '/change-password': (context) {
           final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>? ?? {};
           return ChangePasswordPage(
