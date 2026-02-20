@@ -90,13 +90,18 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
   }
 
   Future<void> _ensureExercisesInBackend() async {
-    List<Map<String, String>> allEx = [];
-    _exerciseCatalog.forEach((cat, list) {
-      for (var name in list) {
-        allEx.add({'name': name, 'category': cat});
-      }
-    });
-    await _workoutService.ensureExercises(allEx);
+    try {
+      List<Map<String, String>> allEx = [];
+      _exerciseCatalog.forEach((cat, list) {
+        for (var name in list) {
+          allEx.add({'name': name, 'category': cat});
+        }
+      });
+      await _workoutService.ensureExercises(allEx);
+      print('[DEBUG_LOG] Catálogo de exercícios garantido no backend.');
+    } catch (e) {
+      print('[DEBUG_LOG] Erro ao garantir catálogo: $e');
+    }
   }
 
   void _openExerciseCategory(String category) async {
@@ -144,11 +149,19 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
     // Resolver IDs dos exercícios pelo nome
     for (var ex in _selectedExercises) {
       if (ex['exerciseId'] == null) {
+        // Usa busca exata para garantir o ID correto
         final results = await _workoutService.getExercises(query: ex['name']);
         if (results.isNotEmpty) {
-          // Procura match exato
-          final match = results.firstWhere((element) => element['name'] == ex['name'], orElse: () => results.first);
-          ex['exerciseId'] = match['id'];
+          // Procura match exato (ignora case se necessário, mas o catálogo é fixo)
+          try {
+            final match = results.firstWhere(
+              (element) => element['name'].toString().toLowerCase() == ex['name'].toString().toLowerCase(),
+              orElse: () => results.first
+            );
+            ex['exerciseId'] = match['id'];
+          } catch (e) {
+            ex['exerciseId'] = results.first['id'];
+          }
         }
       }
     }
