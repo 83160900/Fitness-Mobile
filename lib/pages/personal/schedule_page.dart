@@ -526,9 +526,7 @@ class _SchedulePageState extends State<SchedulePage> {
               subtitle: const Text('Mover reserva para outro dia'),
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Funcionalidade de troca sendo finalizada.'))
-                );
+                _showMoveSelection(slot);
               },
             ),
             const SizedBox(height: 16),
@@ -554,6 +552,81 @@ class _SchedulePageState extends State<SchedulePage> {
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao cancelar.')));
+    }
+    setState(() => _isLoading = false);
+  }
+
+  void _showMoveSelection(dynamic slot) {
+    DateTime selectedMoveDate = _selectedDay;
+    
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => Container(
+          padding: const EdgeInsets.all(24),
+          height: MediaQuery.of(context).size.height * 0.7,
+          child: Column(
+            children: [
+              const Text('Selecione Novo Dia e Horário', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+              CalendarDatePicker(
+                initialDate: selectedMoveDate,
+                firstDate: DateTime.now(),
+                lastDate: DateTime.now().add(const Duration(days: 90)),
+                onDateChanged: (date) {
+                  setModalState(() => selectedMoveDate = date);
+                },
+              ),
+              const Divider(),
+              const Text('Horários Disponíveis (Geral)', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              Expanded(
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: List.generate(15, (index) {
+                    int h = 7 + index;
+                    String timeLabel = '${h.toString().padLeft(2, '0')}:00';
+                    return ElevatedButton(
+                      onPressed: () {
+                        DateTime newTime = DateTime(selectedMoveDate.year, selectedMoveDate.month, selectedMoveDate.day, h);
+                        Navigator.pop(context);
+                        _doMoveSlot(slot['id'], newTime);
+                      },
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.blue[50], foregroundColor: Colors.blue),
+                      child: Text(timeLabel),
+                    );
+                  }),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _doMoveSlot(String slotId, DateTime newTime) async {
+    setState(() => _isLoading = true);
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/schedule/move'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'slotId': slotId,
+          'startTime': newTime.toIso8601String(),
+        }),
+      );
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Aula movida com sucesso!')));
+        _loadSlots();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: ${response.body}')));
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao mover aula.')));
     }
     setState(() => _isLoading = false);
   }
