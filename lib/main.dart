@@ -12,6 +12,7 @@ import 'pages/personal/invite_page.dart';
 import 'pages/personal/create_workout_page.dart';
 import 'pages/notifications/notifications_page.dart';
 import 'pages/common/profile_page.dart';
+import 'pages/student/workouts_page.dart';
 
 void main() {
   runApp(FitnessApp());
@@ -114,6 +115,11 @@ class FitnessApp extends StatelessWidget {
         '/profile': (context) {
           final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>? ?? {};
           return ProfilePage(userData: args);
+        },
+        '/workouts': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>? ?? {};
+          final email = args['email'] ?? '';
+          return WorkoutsPage(userEmail: email);
         },
         '/change-password': (context) {
           final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>? ?? {};

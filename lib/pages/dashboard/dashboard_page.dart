@@ -147,9 +147,14 @@ class _DashboardPageState extends State<DashboardPage> {
           ],
           if (role == 'ALUNO') ...[
             _buildDrawerItem(Icons.calendar_month, 'Marcar Aula', 1, route: '/schedule', arguments: userData),
-              _buildDrawerItem(Icons.person, 'Meus Dados', 4, route: '/profile', arguments: userData),
-            _buildDrawerItem(Icons.fitness_center, 'Meus Treinos', 2, route: '/workouts'),
-            _buildDrawerItem(Icons.history, 'Meu Histórico', 3),
+            _buildDrawerItem(Icons.fitness_center, 'Meu Treino', 2, route: '/workouts', arguments: userData),
+            _buildDrawerItem(Icons.show_chart, 'Minha Evolução', 3, route: '/bioimpedance-details', arguments: {
+              'student': {
+                'name': name,
+                'email': userEmail,
+              }
+            }),
+            _buildDrawerItem(Icons.person, 'Meus Dados', 4, route: '/profile', arguments: userData),
           ],
           const Spacer(),
           const Divider(),
@@ -219,10 +224,9 @@ class _DashboardPageState extends State<DashboardPage> {
           ],
           if (role == 'ALUNO') ...[
             Text('Olá, $name!', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            const Text('Seu progresso hoje', style: TextStyle(color: Colors.grey)),
-            const SizedBox(height: 24),
-            _buildModuleCard(context, 'Treino do Dia', Icons.play_circle_fill, Colors.orange),
-            _buildModuleCard(context, 'Minha Evolução', Icons.show_chart, Colors.green),
+            const Text('Bem-vindo ao seu painel', style: TextStyle(color: Colors.grey)),
+            const SizedBox(height: 8),
+            // As chamadas 'Treino do Dia' e 'Minha Evolução' foram ocultadas conforme solicitação.
           ]
         ],
       ),
