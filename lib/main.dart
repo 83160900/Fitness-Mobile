@@ -22,51 +22,84 @@ void main() {
 class FitnessApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    const primaryColor = Color(0xFF0F2A3D);
+    const secondaryColor = Color(0xFF1F6F5C);
+    const backgroundColor = Color(0xFFF4F6F8);
+    const darkTextColor = Color(0xFF1C1F26);
+    const borderColor = Color(0xFFD1D5DB);
+
     return MaterialApp(
       title: 'Fitness Platform',
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF00BFA5), // Verde ÃƒÆ’Ã‚Âgua / SaÃƒÆ’Ã‚Âºde
-          primary: const Color(0xFF00BFA5),
-          secondary: const Color(0xFF00796B),
-          tertiary: const Color(0xFF26A69A),
+          seedColor: primaryColor,
+          primary: primaryColor,
+          secondary: secondaryColor,
           surface: Colors.white,
-          background: const Color(0xFFF1F8F7),
+          background: backgroundColor,
+          error: const Color(0xFFB00020),
         ),
-        scaffoldBackgroundColor: const Color(0xFFF1F8F7),
+        scaffoldBackgroundColor: backgroundColor,
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF00BFA5),
+          backgroundColor: primaryColor,
           foregroundColor: Colors.white,
           elevation: 0,
+          centerTitle: true,
+          titleTextStyle: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        cardTheme: CardTheme(
+          color: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: borderColor, width: 1),
+          ),
+          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF00BFA5),
+            backgroundColor: secondaryColor,
             foregroundColor: Colors.white,
             minimumSize: const Size(double.infinity, 54),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
-            elevation: 2,
+            elevation: 0,
+            textStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: Colors.white,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
+            borderSide: const BorderSide(color: borderColor),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
+            borderSide: const BorderSide(color: borderColor),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFF00BFA5), width: 2),
+            borderSide: const BorderSide(color: secondaryColor, width: 2),
           ),
-          labelStyle: const TextStyle(color: Color(0xFF00796B)),
+          labelStyle: const TextStyle(color: primaryColor),
+          hintStyle: const TextStyle(color: Colors.grey),
+        ),
+        textTheme: const TextTheme(
+          displayLarge: TextStyle(color: darkTextColor, fontWeight: FontWeight.bold),
+          titleLarge: TextStyle(color: darkTextColor, fontWeight: FontWeight.bold),
+          bodyLarge: TextStyle(color: darkTextColor),
+          bodyMedium: TextStyle(color: darkTextColor),
         ),
       ),
       initialRoute: '/',

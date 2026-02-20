@@ -441,8 +441,8 @@ class _SchedulePageState extends State<SchedulePage> {
         Color color = Colors.grey[100]!;
         Color textColor = Colors.black54;
 
-        if (status == 'RESERVADO') { color = Colors.yellow[600]!; textColor = Colors.black; }
-        else if (status == 'CONFIRMADO') { color = Colors.green[600]!; textColor = Colors.white; }
+        if (status == 'RESERVADO') { color = Colors.orange[400]!; textColor = Colors.white; }
+        else if (status == 'CONFIRMADO') { color = const Color(0xFF1F6F5C); textColor = Colors.white; }
 
         return InkWell(
           onTap: (slot != null && (status == 'RESERVADO' || status == 'CONFIRMADO'))

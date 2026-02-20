@@ -265,35 +265,39 @@ class _DashboardPageState extends State<DashboardPage> {
 
   Widget _buildBody(BuildContext context, String name, String role, String userEmail, Map<String, dynamic> userData) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20.0),
+      padding: const EdgeInsets.all(24.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (role == 'PERSONAL') ...[
-            const Text(
-              'Visão 360° dos seus alunos',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            Text(
+              'Olá, $name',
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const Text(
-              'Adesão, evolução, alertas e próximas ações em tempo real',
-              style: TextStyle(color: Colors.grey, fontSize: 13),
-            ),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                _buildStatCard('Ativos', _summary['activeStudents'].toString(), Colors.blue),
-                _buildStatCard('Alertas', _summary['alerts'].toString(), Colors.orange),
-                _buildStatCard('Meta', _summary['goalProgress'].toString(), Colors.green),
-              ],
+              'Acompanhe o progresso da sua consultoria',
+              style: TextStyle(color: Colors.grey, fontSize: 14),
             ),
             const SizedBox(height: 32),
+            Row(
+              children: [
+                Expanded(child: _buildStatCard('Ativos', _summary['activeStudents'].toString(), const Color(0xFF0F2A3D))),
+                const SizedBox(width: 12),
+                Expanded(child: _buildStatCard('Alertas', _summary['alerts'].toString(), const Color(0xFFB00020))),
+                const SizedBox(width: 12),
+                Expanded(child: _buildStatCard('Meta', _summary['goalProgress'].toString(), const Color(0xFF1F6F5C))),
+              ],
+            ),
+            const SizedBox(height: 40),
             _buildActionSection(context, name, userEmail, userData),
           ],
           if (role == 'ALUNO') ...[
-            Text('Olá, $name!', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            const Text('Bem-vindo ao seu painel', style: TextStyle(color: Colors.grey)),
-            const SizedBox(height: 8),
-            // As chamadas 'Treino do Dia' e 'Minha Evolução' foram ocultadas conforme solicitação.
+            Text('Olá, $name!', style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+            const Text('Seu treino e evolução em um só lugar.', style: TextStyle(color: Colors.grey, fontSize: 16)),
+            const SizedBox(height: 32),
+            // Módulo de acesso rápido para o Aluno
+            _buildModuleCard(context, 'Meu Treino Atual', Icons.fitness_center, const Color(0xFF1F6F5C), '/workouts', {'email': userEmail}),
+            _buildModuleCard(context, 'Minha Agenda', Icons.calendar_month, const Color(0xFF0F2A3D), '/schedule', userData),
           ]
         ],
       ),
@@ -301,19 +305,21 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Widget _buildStatCard(String label, String value, Color color) {
-    return Expanded(
-      child: Card(
-        elevation: 0,
-        color: color.withOpacity(0.1),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16.0),
-          child: Column(
-            children: [
-              Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color)),
-              Text(label, style: TextStyle(fontSize: 11, color: color.withOpacity(0.8))),
-            ],
-          ),
+    return Card(
+      elevation: 0,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: const BorderSide(color: Color(0xFFD1D5DB), width: 1),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20.0),
+        child: Column(
+          children: [
+            Text(value, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: color)),
+            const SizedBox(height: 4),
+            Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[600], fontWeight: FontWeight.w500)),
+          ],
         ),
       ),
     );
