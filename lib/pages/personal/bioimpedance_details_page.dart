@@ -5,7 +5,8 @@ import '../../services/auth_service.dart';
 
 class BioimpedanceDetailsPage extends StatefulWidget {
   final Map<String, dynamic> student;
-  const BioimpedanceDetailsPage({required this.student});
+  final bool isReadOnly;
+  const BioimpedanceDetailsPage({required this.student, this.isReadOnly = false});
 
   @override
   _BioimpedanceDetailsPageState createState() => _BioimpedanceDetailsPageState();
@@ -34,7 +35,7 @@ class _BioimpedanceDetailsPageState extends State<BioimpedanceDetailsPage> with 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: widget.isReadOnly ? 3 : 4, vsync: this);
     _loadHistory();
   }
 
@@ -111,12 +112,12 @@ class _BioimpedanceDetailsPageState extends State<BioimpedanceDetailsPage> with 
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Bioimpedância: ${widget.student['name']}'),
+        title: Text(widget.isReadOnly ? 'Minha Evolução' : 'Bioimpedância: ${widget.student['name']}'),
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
-          tabs: const [
-            Tab(text: '🧠 Bioimpedância', icon: Icon(Icons.psychology)),
+          tabs: [
+            if (!widget.isReadOnly) Tab(text: '🧠 Bioimpedância', icon: Icon(Icons.psychology)),
             Tab(text: '📈 Evolução', icon: Icon(Icons.trending_up)),
             Tab(text: '📊 Histórico', icon: Icon(Icons.history)),
             Tab(text: '🎯 IA Análise', icon: Icon(Icons.auto_awesome)),
@@ -126,7 +127,7 @@ class _BioimpedanceDetailsPageState extends State<BioimpedanceDetailsPage> with 
       body: TabBarView(
         controller: _tabController,
         children: [
-          _buildInputTab(),
+          if (!widget.isReadOnly) _buildInputTab(),
           _buildEvolutionTab(),
           _buildHistoryTab(),
           _buildAIAnalysisTab(),

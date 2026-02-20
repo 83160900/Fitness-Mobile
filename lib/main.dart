@@ -98,9 +98,12 @@ class FitnessApp extends StatelessWidget {
           );
         }
         if (settings.name == '/bioimpedance-details') {
-          final student = settings.arguments as Map<String, dynamic>? ?? {};
+          final args = settings.arguments as Map<String, dynamic>? ?? {};
           return MaterialPageRoute(
-            builder: (context) => BioimpedanceDetailsPage(student: student),
+            builder: (context) => BioimpedanceDetailsPage(
+              student: args['student'] ?? {},
+              isReadOnly: args['isReadOnly'] ?? false,
+            ),
           );
         }
         return null;

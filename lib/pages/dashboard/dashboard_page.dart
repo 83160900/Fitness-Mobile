@@ -198,7 +198,8 @@ class _DashboardPageState extends State<DashboardPage> {
               'student': {
                 'name': name,
                 'email': userEmail,
-              }
+              },
+              'isReadOnly': true,
             }),
             _buildDrawerItem(Icons.person, 'Meus Dados', 4, route: '/profile', arguments: userData),
           ],
