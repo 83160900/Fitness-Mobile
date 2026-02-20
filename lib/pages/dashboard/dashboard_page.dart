@@ -193,7 +193,7 @@ class _DashboardPageState extends State<DashboardPage> {
           ],
           if (role == 'ALUNO') ...[
             _buildDrawerItem(Icons.calendar_month, 'Marcar Aula', 1, route: '/schedule', arguments: userData),
-            _buildDrawerItem(Icons.fitness_center, 'Meu Treino', 2, route: '/workouts', arguments: userData),
+            _buildDrawerItem(Icons.fitness_center, 'Meu Treino', 2, route: '/workouts', arguments: {'email': userEmail}),
             _buildDrawerItem(Icons.show_chart, 'Minha Evolução', 3, route: '/bioimpedance-details', arguments: {
               'student': {
                 'name': name,
