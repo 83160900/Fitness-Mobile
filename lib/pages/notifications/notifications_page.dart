@@ -197,36 +197,35 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                         // Botão de Recusar (visível em todos os status de reserva não cancelados)
                                         if (notif['status'] != 'ARQUIVADA')
                                           SizedBox(
-                                            height: 40,
-                                            width: 130,
+                                            height: 36,
+                                            width: 110,
                                             child: ElevatedButton.icon(
                                               onPressed: () => _confirmReserva(notif['id'], notif['slotId'], false),
-                                              icon: const Icon(Icons.cancel, size: 18),
-                                              label: const Text('RECUSAR', style: TextStyle(fontWeight: FontWeight.bold)),
+                                              icon: const Icon(Icons.cancel, size: 14),
+                                              label: const Text('RECUSAR', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 10)),
                                               style: ElevatedButton.styleFrom(
                                                 backgroundColor: Colors.redAccent,
                                                 foregroundColor: Colors.white,
                                                 elevation: 0,
+                                                padding: EdgeInsets.zero,
                                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                               ),
                                             ),
                                           ),
                                         
-                                        // Botão de Confirmar (Só aparece se NÃO estiver confirmada ainda ou status pendente)
-                                        // Se o status for LIDA (após primeira abertura) ou PENDENTE, mostramos
-                                        // Se for um status customizado que indica já confirmado, ocultamos.
                                         if (notif['status'] == 'PENDENTE' || notif['status'] == null)
                                           SizedBox(
-                                            height: 40,
-                                            width: 130,
+                                            height: 36,
+                                            width: 110,
                                             child: ElevatedButton.icon(
                                               onPressed: () => _confirmReserva(notif['id'], notif['slotId'], true),
-                                              icon: const Icon(Icons.check_circle, size: 18),
-                                              label: const Text('CONFIRMAR', style: TextStyle(fontWeight: FontWeight.bold)),
+                                              icon: const Icon(Icons.check_circle, size: 14),
+                                              label: const Text('CONFIRMAR', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 10)),
                                               style: ElevatedButton.styleFrom(
                                                 backgroundColor: Colors.green,
                                                 foregroundColor: Colors.white,
                                                 elevation: 0,
+                                                padding: EdgeInsets.zero,
                                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                               ),
                                             ),
