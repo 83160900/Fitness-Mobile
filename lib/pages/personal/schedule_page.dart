@@ -220,9 +220,10 @@ class _SchedulePageState extends State<SchedulePage> {
   }
 
   Widget _buildStudentList() {
-    // Lista simplificada para o Aluno (☐ 06:00) + histórico de cancelados do próprio aluno
+    // Lista do Aluno: horários disponíveis + suas aulas do dia + histórico do dia
     final List<DateTime> availableTimes = [];
-    final List<dynamic> canceledByMe = [];
+    final List<dynamic> mySlotsToday = [];
+    final List<dynamic> historyToday = [];
 
     for (int h = 6; h <= 22; h++) {
       final time = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day, h, 0);
@@ -231,7 +232,7 @@ class _SchedulePageState extends State<SchedulePage> {
       final slot = _slots.firstWhere((s) {
         try {
           final startTime = DateTime.parse(s['startTime']);
-          return startTime.hour == h && s['status'] != 'CANCELADO';
+          return startTime.year == _selectedDate.year && startTime.month == _selectedDate.month && startTime.day == _selectedDate.day && startTime.hour == h && s['status'] != 'CANCELADO';
         } catch (e) {
           return false;
         }
@@ -243,38 +244,64 @@ class _SchedulePageState extends State<SchedulePage> {
       }
     }
 
-    // Histórico de cancelados SOMENTE para o aluno que cancelou (no dia selecionado)
+    // Minhas aulas do dia (RESERVADO/CONFIRMADO) e histórico (CANCELADO)
     for (final s in _slots) {
       try {
-        if (s['status'] == 'CANCELADO' && s['studentEmail'] == _userEmail) {
-          final dt = DateTime.parse(s['startTime']);
-          if (dt.year == _selectedDate.year && dt.month == _selectedDate.month && dt.day == _selectedDate.day) {
-            canceledByMe.add(s);
+        final dt = DateTime.parse(s['startTime']);
+        if (dt.year == _selectedDate.year && dt.month == _selectedDate.month && dt.day == _selectedDate.day && s['studentEmail'] == _userEmail) {
+          final status = s['status'];
+          if (status == 'RESERVADO' || status == 'CONFIRMADO') {
+            mySlotsToday.add(s);
+          } else if (status == 'CANCELADO') {
+            historyToday.add(s);
           }
         }
       } catch (_) {}
     }
 
-    // Constrói a lista com seção de horários livres e (se houver) seção de cancelados
+    // Constrói a lista com seções
     final List<Widget> children = [];
 
-    if (availableTimes.isEmpty) {
+    // Seção: Suas aulas do dia
+    if (mySlotsToday.isNotEmpty) {
       children.add(
-        Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.calendar_today_outlined, size: 64, color: Colors.grey[300]),
-              const SizedBox(height: 16),
-              const Text('Nenhum horário livre para este dia.',
-                  style: TextStyle(color: Colors.grey, fontSize: 16),
-                  textAlign: TextAlign.center),
-            ],
-          ),
+        const Padding(
+          padding: EdgeInsets.only(left: 20, right: 20, top: 8, bottom: 8),
+          child: Text('Suas aulas do dia', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
         ),
       );
-    } else {
+      for (final s in mySlotsToday) {
+        final dt = DateTime.parse(s['startTime']);
+        final status = s['status'];
+        Color badgeColor = Colors.amber;
+        String label = 'Aguardando aprovação';
+        Color textColor = Colors.black;
+        if (status == 'CONFIRMADO') { badgeColor = Colors.green; label = 'Confirmada'; textColor = Colors.white; }
+        if (status == 'RESERVADO') { badgeColor = Colors.yellow[700]!; label = 'Aguardando aprovação'; textColor = Colors.black; }
+
+        children.add(
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Card(
+              elevation: 0,
+              color: badgeColor.withOpacity(0.08),
+              margin: const EdgeInsets.only(bottom: 8),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: ListTile(
+                leading: CircleAvatar(backgroundColor: badgeColor, child: const Icon(Icons.fitness_center, color: Colors.white, size: 18)),
+                title: Text('${DateFormat('HH:mm').format(dt)} Aula', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                subtitle: Text(label, style: TextStyle(color: Colors.grey[700])),
+              ),
+            ),
+          ),
+        );
+      }
+      children.add(const SizedBox(height: 8));
+      children.add(const Divider());
+    }
+
+    // Seção: Horários disponíveis
+    if (availableTimes.isNotEmpty) {
       children.add(
         const Padding(
           padding: EdgeInsets.only(left: 20, right: 20, top: 8, bottom: 8),
@@ -303,19 +330,39 @@ class _SchedulePageState extends State<SchedulePage> {
           ),
         );
       }
+    } else {
+      children.add(
+        Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.calendar_today_outlined, size: 64, color: Colors.grey[300]),
+              const SizedBox(height: 16),
+              const Text('Nenhum horário livre para este dia.',
+                  style: TextStyle(color: Colors.grey, fontSize: 16),
+                  textAlign: TextAlign.center),
+            ],
+          ),
+        ),
+      );
     }
 
-    if (canceledByMe.isNotEmpty) {
+    // Seção: Histórico do dia (Canceladas/Rejeitadas)
+    if (historyToday.isNotEmpty) {
       children.add(const SizedBox(height: 8));
       children.add(const Divider());
       children.add(
         const Padding(
           padding: EdgeInsets.only(left: 20, right: 20, top: 8, bottom: 8),
-          child: Text('Seus cancelamentos', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+          child: Text('Histórico (dia selecionado)', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
         ),
       );
-      for (final s in canceledByMe) {
+      for (final s in historyToday) {
         final dt = DateTime.parse(s['startTime']);
+        final byMe = s['studentEmail'] == _userEmail; // ainda é minha, mas verifica quem cancelou via mensagem
+        final reason = (s['rejectionReason'] ?? '').toString();
+        final subtitle = reason.isNotEmpty ? 'Rejeitada pelo personal' : (byMe ? 'Cancelada por você' : 'Cancelada');
         children.add(
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -327,10 +374,10 @@ class _SchedulePageState extends State<SchedulePage> {
               child: ListTile(
                 leading: const Icon(Icons.cancel, color: Colors.red),
                 title: Text(
-                  '${DateFormat('HH:mm').format(dt)} Cancelado por você',
+                  '${DateFormat('HH:mm').format(dt)} $subtitle',
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.red),
                 ),
-                subtitle: const Text('Este horário está novamente disponível para marcação'),
+                subtitle: reason.isNotEmpty ? Text('Motivo: $reason') : null,
               ),
             ),
           ),

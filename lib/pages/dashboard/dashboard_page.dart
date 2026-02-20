@@ -34,11 +34,17 @@ class _DashboardPageState extends State<DashboardPage> {
     if (userEmail.isEmpty) return;
 
     try {
-      final response = await http.get(Uri.parse('$baseUrl/notifications?email=$userEmail&status=PENDENTE')).timeout(const Duration(seconds: 10));
+      // Busca sem filtro de status para ser resiliente a status nulo no backend
+      final response = await http.get(Uri.parse('$baseUrl/notifications?email=$userEmail')).timeout(const Duration(seconds: 10));
       if (response.statusCode == 200) {
         final List<dynamic> notifs = jsonDecode(response.body);
+        // Considera como pendentes tudo que NÃO for LIDA/ARQUIVADA (ou status nulo)
+        final int pending = notifs.where((n) {
+          final s = n['status'];
+          return s == null || (s != 'LIDA' && s != 'ARQUIVADA');
+        }).length;
         setState(() {
-          _notificationCount = notifs.length;
+          _notificationCount = pending;
         });
       }
     } catch (e) {

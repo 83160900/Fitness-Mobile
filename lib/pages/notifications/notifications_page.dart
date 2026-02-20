@@ -119,7 +119,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(notif['message'] ?? ''),
-                                  if (notif['type'] == 'RESERVA' && notif['status'] == 'PENDENTE') ...[
+                                  if (notif['type'] == 'RESERVA' && (notif['status'] == null || notif['status'] == 'PENDENTE')) ...[
                                     const SizedBox(height: 16),
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.end,
