@@ -56,6 +56,13 @@ class _NotificationsPageState extends State<NotificationsPage> {
   }
 
   Future<void> _confirmReserva(String slotId, bool confirm) async {
+    String? reason;
+    if (!confirm) {
+      // Solicita motivo da recusa
+      reason = await _showReasonDialog();
+      if (reason == null) return; // Cancelou o diálogo
+    }
+
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/schedule/confirm'),
@@ -63,6 +70,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
         body: jsonEncode({
           'slotId': slotId,
           'confirm': confirm,
+          'reason': reason,
         }),
       );
       if (response.statusCode == 200) {
@@ -74,6 +82,27 @@ class _NotificationsPageState extends State<NotificationsPage> {
     } catch (e) {
       print('Erro ao confirmar reserva: $e');
     }
+  }
+
+  Future<String?> _showReasonDialog() async {
+    String reason = "";
+    return showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Motivo da Recusa'),
+        content: TextField(
+          onChanged: (v) => reason = v,
+          decoration: const InputDecoration(hintText: 'Ex: Horário indisponível'),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('CANCELAR')),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, reason.trim().isEmpty ? "Não informado" : reason),
+            child: const Text('RECUSAR'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

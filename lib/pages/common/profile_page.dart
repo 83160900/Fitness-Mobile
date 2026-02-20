@@ -20,6 +20,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   bool _loading = true;
   bool _saving = false;
+  String? _photoUrl;
 
   @override
   void initState() {
@@ -42,6 +43,7 @@ class _ProfilePageState extends State<ProfilePage> {
           _nameCtrl.text = data['name'] ?? '';
           _phoneCtrl.text = data['phone'] ?? '';
           _addressCtrl.text = data['address'] ?? '';
+          _photoUrl = data['photoUrl'];
           _loading = false;
         });
       } else {
@@ -64,6 +66,7 @@ class _ProfilePageState extends State<ProfilePage> {
           'name': _nameCtrl.text,
           'phone': _phoneCtrl.text,
           'address': _addressCtrl.text,
+          'photoUrl': _photoUrl,
         }),
       );
       if (resp.statusCode == 200) {
@@ -80,6 +83,31 @@ class _ProfilePageState extends State<ProfilePage> {
     setState(() => _saving = false);
   }
 
+  void _updatePhotoUrl() {
+    String tempUrl = _photoUrl ?? "";
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('URL da Foto de Perfil'),
+        content: TextField(
+          onChanged: (v) => tempUrl = v,
+          decoration: const InputDecoration(hintText: 'https://exemplo.com/foto.jpg'),
+          controller: TextEditingController(text: _photoUrl),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('CANCELAR')),
+          ElevatedButton(
+            onPressed: () {
+              setState(() => _photoUrl = tempUrl.trim().isEmpty ? null : tempUrl.trim());
+              Navigator.pop(context);
+            },
+            child: const Text('DEFINIR'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -92,6 +120,34 @@ class _ProfilePageState extends State<ProfilePage> {
                 key: _formKey,
                 child: ListView(
                   children: [
+                    Center(
+                      child: Stack(
+                        children: [
+                          CircleAvatar(
+                            radius: 50,
+                            backgroundImage: (_photoUrl != null && _photoUrl!.isNotEmpty)
+                                ? NetworkImage(_photoUrl!)
+                                : null,
+                            child: (_photoUrl == null || _photoUrl!.isEmpty)
+                                ? const Icon(Icons.person, size: 50)
+                                : null,
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: CircleAvatar(
+                              backgroundColor: Theme.of(context).primaryColor,
+                              radius: 18,
+                              child: IconButton(
+                                icon: const Icon(Icons.camera_alt, size: 18, color: Colors.white),
+                                onPressed: _updatePhotoUrl,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
                     TextFormField(
                       controller: _nameCtrl,
                       decoration: const InputDecoration(labelText: 'Nome'),
