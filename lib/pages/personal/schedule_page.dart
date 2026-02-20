@@ -21,10 +21,18 @@ class _SchedulePageState extends State<SchedulePage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-    _userEmail = args?['email'];
-    _userRole = args?['role'] ?? 'ALUNO'; 
-    _userName = args?['name'] ?? 'Aluno';
-    _loadSlots();
+    if (args != null) {
+      _userEmail = args['email'];
+      _userRole = args['role'] ?? 'ALUNO'; 
+      _userName = args['name'] ?? 'Aluno';
+      if (_userEmail != null) {
+        _loadSlots();
+      } else {
+        setState(() => _isLoading = false);
+      }
+    } else {
+      setState(() => _isLoading = false);
+    }
   }
 
   Future<void> _loadSlots() async {
@@ -168,7 +176,10 @@ class _SchedulePageState extends State<SchedulePage> {
     final List<DateTime> availableTimes = [];
     for (int h = 6; h <= 22; h++) {
       final time = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day, h, 0);
-      final slot = _slots.firstWhere((s) => DateTime.parse(s['startTime']).hour == h, orElse: () => null);
+      final slot = _slots.firstWhere((s) => 
+        DateTime.parse(s['startTime']).hour == h, 
+        orElse: () => null
+      );
       
       // Oculta se estiver ocupado (RESERVADO ou CONFIRMADO)
       if (slot == null || slot['status'] == 'CANCELADO') {
@@ -177,7 +188,12 @@ class _SchedulePageState extends State<SchedulePage> {
     }
 
     if (availableTimes.isEmpty) {
-      return const Center(child: Text('Nenhum horário disponível para este dia.'));
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(20.0),
+          child: Text('Nenhum horário disponível para este dia.', textAlign: TextAlign.center),
+        ),
+      );
     }
 
     return ListView.builder(
@@ -221,7 +237,10 @@ class _SchedulePageState extends State<SchedulePage> {
       itemCount: 17, // 06:00 as 22:00
       itemBuilder: (context, index) {
         int hour = 6 + index;
-        final slot = _slots.firstWhere((s) => DateTime.parse(s['startTime']).hour == hour, orElse: () => null);
+        final slot = _slots.firstWhere((s) => 
+          DateTime.parse(s['startTime']).hour == hour, 
+          orElse: () => null
+        );
         
         String status = slot != null ? slot['status'] : 'LIVRE';
         Color color = Colors.grey[100]!;
@@ -231,21 +250,78 @@ class _SchedulePageState extends State<SchedulePage> {
         else if (status == 'CONFIRMADO') { color = Colors.green[400]!; textColor = Colors.white; }
         else if (status == 'CANCELADO') { color = Colors.red[400]!; textColor = Colors.white; }
 
-        return Container(
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('${hour.toString().padLeft(2, '0')}:00', style: TextStyle(fontWeight: FontWeight.bold, color: textColor)),
-              if (slot != null && slot['studentEmail'] != null)
-                Text(slot['studentEmail'].split('@')[0], style: TextStyle(fontSize: 10, color: textColor), overflow: TextOverflow.ellipsis),
-            ],
+        return InkWell(
+          onTap: (slot != null && (status == 'RESERVADO' || status == 'CONFIRMADO'))
+            ? () => _showPersonalActions(slot)
+            : null,
+          child: Container(
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('${hour.toString().padLeft(2, '0')}:00', style: TextStyle(fontWeight: FontWeight.bold, color: textColor)),
+                if (slot != null && slot['studentEmail'] != null)
+                  Text(slot['studentEmail'].split('@')[0], style: TextStyle(fontSize: 10, color: textColor), overflow: TextOverflow.ellipsis),
+              ],
+            ),
           ),
         );
       },
     );
+  }
+
+  void _showPersonalActions(dynamic slot) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Ações do Personal', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 20),
+            ListTile(
+              leading: const Icon(Icons.cancel, color: Colors.red),
+              title: const Text('Cancelar Aula'),
+              onTap: () {
+                Navigator.pop(context);
+                _cancelSlot(slot['id']);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.swap_horiz, color: Colors.blue),
+              title: const Text('Trocar Data'),
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Funcionalidade em breve.')));
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _cancelSlot(String slotId) async {
+    setState(() => _isLoading = true);
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/schedule/cancel'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'slotId': slotId}),
+      );
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Horário cancelado!')));
+        _loadSlots();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(response.body)));
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao cancelar.')));
+    }
+    setState(() => _isLoading = false);
   }
 }
