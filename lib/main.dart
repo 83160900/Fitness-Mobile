@@ -5,6 +5,8 @@ import 'pages/common/registration_page.dart';
 import 'pages/dashboard/dashboard_page.dart';
 import 'pages/personal/students_page.dart';
 import 'pages/personal/student_detail_page.dart';
+import 'pages/personal/bioimpedance_students_page.dart';
+import 'pages/personal/bioimpedance_details_page.dart';
 import 'pages/personal/invite_page.dart';
 import 'pages/personal/create_workout_page.dart';
 
@@ -91,12 +93,19 @@ class FitnessApp extends StatelessWidget {
             ),
           );
         }
+        if (settings.name == '/bioimpedance-details') {
+          final student = settings.arguments as Map<String, dynamic>? ?? {};
+          return MaterialPageRoute(
+            builder: (context) => BioimpedanceDetailsPage(student: student),
+          );
+        }
         return null;
       },
       routes: {
         '/': (context) => LoginPage(),
         '/register': (context) => RegisterPage(),
         '/dashboard': (context) => DashboardPage(),
+        '/bioimpedance-students': (context) => BioimpedanceStudentsPage(),
         '/change-password': (context) {
           final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>? ?? {};
           return ChangePasswordPage(
