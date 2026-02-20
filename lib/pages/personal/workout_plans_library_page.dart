@@ -93,6 +93,32 @@ class _WorkoutPlansLibraryPageState extends State<WorkoutPlansLibraryPage> {
     }
   }
 
+  void _confirmDelete(dynamic plan) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Excluir Treino'),
+        content: Text('Deseja realmente remover o treino "${plan['name']}" da sua biblioteca?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              final success = await _workoutService.deleteWorkout(plan['id']);
+              if (success) {
+                _loadPlans();
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Treino removido com sucesso.')));
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Falha ao remover treino.')));
+              }
+            },
+            child: const Text('Excluir', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -119,10 +145,20 @@ class _WorkoutPlansLibraryPageState extends State<WorkoutPlansLibraryPage> {
                         child: ExpansionTile(
                           title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
                           subtitle: Text('Original: $studentName • $exerciseCount exs • $dateStr'),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.person_add, color: Colors.teal),
-                            tooltip: 'Vincular a outro aluno',
-                            onPressed: () => _showLinkDialog(plan),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.person_add, color: Colors.teal),
+                                tooltip: 'Vincular a outro aluno',
+                                onPressed: () => _showLinkDialog(plan),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                                tooltip: 'Excluir da biblioteca',
+                                onPressed: () => _confirmDelete(plan),
+                              ),
+                            ],
                           ),
                           children: [
                             if ((plan['items'] as List?)?.isEmpty ?? true)

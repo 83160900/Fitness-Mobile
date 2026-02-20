@@ -143,7 +143,7 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
     final title = (plan['name'] ?? 'Plano de Treino').toString();
     final createdAt = plan['createdAt'];
     final dateStr = createdAt != null ? DateFormat('dd/MM/yyyy').format(DateTime.parse(createdAt)) : '';
-    final exerciseCount = (plan['items'] as List?)?.length ?? 0;
+    final exercises = (plan['items'] as List?) ?? [];
 
     return Card(
       elevation: 0,
@@ -152,17 +152,62 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: Colors.grey.withOpacity(0.2), width: 1),
       ),
-      child: ListTile(
+      child: ExpansionTile(
         leading: const CircleAvatar(
           backgroundColor: Colors.orange,
           child: Icon(Icons.fitness_center, color: Colors.white, size: 20),
         ),
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text('$exerciseCount exercícios${dateStr.isNotEmpty ? ' • Criado em $dateStr' : ''}'),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () {
-          // Visualizar detalhes do treino (opcional por enquanto)
-        },
+        subtitle: Text('${exercises.length} exercícios${dateStr.isNotEmpty ? ' • Criado em $dateStr' : ''}'),
+        trailing: IconButton(
+          icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+          onPressed: () => _confirmDelete(plan),
+        ),
+        children: [
+          if (exercises.isEmpty)
+            const ListTile(title: Text('Sem exercícios cadastrados', style: TextStyle(fontSize: 13)))
+          else
+            ...exercises.map((ex) {
+              final exData = ex['exercise'] ?? {};
+              final name = (exData['name'] ?? 'Exercício').toString();
+              final sets = (ex['sets'] ?? '').toString();
+              final reps = (ex['reps'] ?? '').toString();
+              final rest = (ex['restTime'] ?? '').toString();
+              return ListTile(
+                dense: true,
+                leading: const Icon(Icons.arrow_right, size: 18),
+                title: Text(name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+                subtitle: Text('$sets séries • $reps reps • Descanso: $rest', style: const TextStyle(fontSize: 12)),
+              );
+            }).toList(),
+          const SizedBox(height: 8),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDelete(dynamic plan) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Excluir Treino'),
+        content: Text('Deseja realmente excluir o treino "${plan['name']}"?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              final success = await _workoutService.deleteWorkout(plan['id']);
+              if (success) {
+                _loadWorkouts();
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Treino excluído com sucesso.')));
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Falha ao excluir treino.')));
+              }
+            },
+            child: const Text('Excluir', style: TextStyle(color: Colors.red)),
+          ),
+        ],
       ),
     );
   }

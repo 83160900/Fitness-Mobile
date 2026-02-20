@@ -90,4 +90,16 @@ class WorkoutService {
       return false;
     }
   }
+
+  Future<bool> deleteWorkout(String planId) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('$baseUrl/workouts/$planId'),
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      print('Erro ao excluir treino: $e');
+      return false;
+    }
+  }
 }
