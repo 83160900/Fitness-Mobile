@@ -1,44 +1,75 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import '../../services/workout_service.dart';
 
-class StudentDetailPage extends StatelessWidget {
+class StudentDetailPage extends StatefulWidget {
   final Map<String, dynamic> student;
+  final String coachEmail;
 
-  const StudentDetailPage({required this.student});
+  const StudentDetailPage({required this.student, required this.coachEmail});
+
+  @override
+  _StudentDetailPageState createState() => _StudentDetailPageState();
+}
+
+class _StudentDetailPageState extends State<StudentDetailPage> {
+  final WorkoutService _workoutService = WorkoutService();
+  List<dynamic> _workouts = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadWorkouts();
+  }
+
+  Future<void> _loadWorkouts() async {
+    setState(() => _isLoading = true);
+    try {
+      final data = await _workoutService.getStudentWorkouts(widget.student['email'] ?? '');
+      setState(() {
+        _workouts = data;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Erro ao carregar treinos: $e');
+      setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(student['name'] ?? 'Detalhes do Aluno'),
+        title: Text(widget.student['name'] ?? 'Detalhes do Aluno'),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header com Foto e Resumo
-            _buildStudentHeader(),
-            const SizedBox(height: 32),
-            
-            // Seção de Treinos
-            _buildSectionTitle(context, 'Treinos Atuais'),
-            // Card mocado removido para limpeza de dados fakes
-            const Center(child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 20),
-              child: Text('Nenhum treino cadastrado ainda para este aluno.', style: TextStyle(color: Colors.grey, fontSize: 13)),
-            )),
-            const SizedBox(height: 24),
-
-            // Dashboard de Bioimpedância (Ocultado conforme solicitado)
-            // _buildSectionTitle(context, 'Evolução Bioimpedância'),
-            // _buildBioimpedanceChart(),
-            // const SizedBox(height: 24),
-
-            // Comparativo Antes e Depois (Ocultado conforme solicitado)
-            // _buildSectionTitle(context, 'Evolução Física (Antes vs Depois)'),
-            // _buildBeforeAfterGallery(),
-            const SizedBox(height: 32),
-          ],
+      body: RefreshIndicator(
+        onRefresh: _loadWorkouts,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header com Foto e Resumo
+              _buildStudentHeader(),
+              const SizedBox(height: 32),
+              
+              // Seção de Treinos
+              _buildSectionTitle(context, 'Treinos Atuais'),
+              if (_isLoading)
+                const Center(child: CircularProgressIndicator())
+              else if (_workouts.isEmpty)
+                const Center(child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20),
+                  child: Text('Nenhum treino cadastrado ainda para este aluno.', style: TextStyle(color: Colors.grey, fontSize: 13)),
+                ))
+              else
+                ..._workouts.map((w) => _buildTrainingCard(w)).toList(),
+              
+              const SizedBox(height: 32),
+            ],
+          ),
         ),
       ),
     );
@@ -49,25 +80,35 @@ class StudentDetailPage extends StatelessWidget {
       children: [
         CircleAvatar(
           radius: 40,
-          backgroundImage: NetworkImage(student['photoUrl'] ?? 'https://i.pravatar.cc/150'),
+          backgroundColor: Colors.teal.withOpacity(0.1),
+          backgroundImage: (widget.student['photoUrl'] != null && widget.student['photoUrl'].toString().isNotEmpty)
+              ? (widget.student['photoUrl'].toString().startsWith('http')
+                  ? NetworkImage(widget.student['photoUrl'].toString())
+                  : NetworkImage('https://fitness-backtend-production.up.railway.app/api/users/photo/${widget.student['photoUrl'].toString().split('/').last}')) as ImageProvider
+              : null,
+          child: (widget.student['photoUrl'] == null || widget.student['photoUrl'].toString().isEmpty)
+              ? Text(widget.student['name'] != null ? widget.student['name'][0] : 'A', style: const TextStyle(fontSize: 32, color: Colors.teal))
+              : null,
         ),
         const SizedBox(width: 16),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              student['name'] ?? 'Aluno',
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const Text('Objetivo: Emagrecimento / Definição', style: TextStyle(color: Colors.grey)),
-            const Text('Adesão: 98%', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
-          ],
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                widget.student['name'] ?? 'Aluno',
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const Text('Objetivo: Emagrecimento / Definição', style: TextStyle(color: Colors.grey)),
+              const Text('Ativo', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+            ],
+          ),
         )
       ],
     );
   }
 
-  Widget _buildSectionTitle(BuildContext context, String title, [String? studentEmail]) {
+  Widget _buildSectionTitle(BuildContext context, String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: Row(
@@ -79,12 +120,16 @@ class StudentDetailPage extends StatelessWidget {
           ),
           if (title == 'Treinos Atuais')
             TextButton.icon(
-              onPressed: () {
+              onPressed: () async {
                 final Map<String, dynamic> args = {
-                  'student': student,
-                  'coachEmail': 'personal@teste.com', // Aqui idealmente viria do Provider/Auth
+                  'student': widget.student,
+                  'coachEmail': widget.coachEmail,
                 };
-                Navigator.pushNamed(context, '/create-workout', arguments: args);
+                
+                final result = await Navigator.pushNamed(context, '/create-workout', arguments: args);
+                if (result == true) {
+                  _loadWorkouts();
+                }
               },
               icon: const Icon(Icons.add, size: 18),
               label: const Text('Novo'),
@@ -94,88 +139,31 @@ class StudentDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildTrainingCard() {
+  Widget _buildTrainingCard(dynamic plan) {
+    final title = (plan['name'] ?? 'Plano de Treino').toString();
+    final createdAt = plan['createdAt'];
+    final dateStr = createdAt != null ? DateFormat('dd/MM/yyyy').format(DateTime.parse(createdAt)) : '';
+    final exerciseCount = (plan['items'] as List?)?.length ?? 0;
+
     return Card(
       elevation: 0,
+      margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: Colors.orange, width: 1),
+        side: BorderSide(color: Colors.grey.withOpacity(0.2), width: 1),
       ),
-      child: const ListTile(
-        leading: Icon(Icons.fitness_center, color: Colors.orange),
-        title: Text('Treino A - Membros Superiores'),
-        subtitle: Text('Frequência: 3x por semana'),
-        trailing: Icon(Icons.video_collection_outlined, color: Colors.blue),
+      child: ListTile(
+        leading: const CircleAvatar(
+          backgroundColor: Colors.orange,
+          child: Icon(Icons.fitness_center, color: Colors.white, size: 20),
+        ),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text('$exerciseCount exercícios${dateStr.isNotEmpty ? ' • Criado em $dateStr' : ''}'),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () {
+          // Visualizar detalhes do treino (opcional por enquanto)
+        },
       ),
-    );
-  }
-
-  Widget _buildBioimpedanceChart() {
-    return Container(
-      height: 180,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.withOpacity(0.2)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          _buildBar('Gordura', 32, Colors.red),
-          _buildBar('Músculo', 45, Colors.green),
-          _buildBar('Água', 60, Colors.blue),
-          _buildBar('Peso', 85, Colors.orange),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBar(String label, double height, Color color) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        Text('${height.toInt()}', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: color)),
-        const SizedBox(height: 4),
-        Container(
-          width: 30,
-          height: height * 1.2,
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.7),
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(label, style: const TextStyle(fontSize: 10)),
-      ],
-    );
-  }
-
-  Widget _buildBeforeAfterGallery() {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildImageCard('Antes (Jan)', 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200'),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildImageCard('Depois (Hoje)', 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200'),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildImageCard(String label, String url) {
-    return Column(
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: Image.network(url, height: 150, width: double.infinity, fit: BoxFit.cover),
-        ),
-        const SizedBox(height: 4),
-        Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
-      ],
     );
   }
 }

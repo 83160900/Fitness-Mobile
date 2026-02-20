@@ -46,7 +46,7 @@ class _WorkoutsPageState extends State<WorkoutsPage> {
                     itemCount: _plans.length,
                     itemBuilder: (context, index) {
                       final plan = _plans[index];
-                      final title = (plan['title'] ?? 'Plano de Treino').toString();
+                      final title = (plan['name'] ?? 'Plano de Treino').toString();
                       final createdAt = plan['createdAt'];
                       final dateStr = createdAt != null ? DateFormat('dd/MM/yyyy').format(DateTime.parse(createdAt)) : '';
                       final exercises = (plan['items'] as List?) ?? [];
@@ -63,10 +63,11 @@ class _WorkoutsPageState extends State<WorkoutsPage> {
                               )
                             else
                               ...exercises.map((ex) {
-                                final name = (ex['name'] ?? '').toString();
+                                final exData = ex['exercise'] ?? {};
+                                final name = (exData['name'] ?? '').toString();
                                 final reps = (ex['reps'] ?? '').toString();
                                 final sets = (ex['sets'] ?? '').toString();
-                                final rest = (ex['rest'] ?? '').toString();
+                                final rest = (ex['restTime'] ?? '').toString();
                                 return ListTile(
                                   leading: const Icon(Icons.fitness_center),
                                   title: Text(name.isNotEmpty ? name : 'Exercício'),

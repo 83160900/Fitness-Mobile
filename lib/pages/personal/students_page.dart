@@ -71,7 +71,10 @@ class _StudentsPageState extends State<StudentsPage> {
                   ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
-                    Navigator.pushNamed(context, '/student-detail', arguments: student);
+                    Navigator.pushNamed(context, '/student-detail', arguments: {
+                      'student': student,
+                      'coachEmail': widget.coachEmail,
+                    });
                   },
                 ),
               );

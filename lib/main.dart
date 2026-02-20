@@ -11,6 +11,7 @@ import 'pages/personal/schedule_page.dart';
 import 'pages/personal/invite_page.dart';
 import 'pages/personal/create_workout_page.dart';
 import 'pages/notifications/notifications_page.dart';
+import 'pages/personal/workout_plans_library_page.dart';
 import 'pages/common/profile_page.dart';
 import 'pages/student/workouts_page.dart';
 
@@ -77,9 +78,12 @@ class FitnessApp extends StatelessWidget {
           );
         }
         if (settings.name == '/student-detail') {
-          final student = settings.arguments as Map<String, dynamic>? ?? {};
+          final args = settings.arguments as Map<String, dynamic>? ?? {};
           return MaterialPageRoute(
-            builder: (context) => StudentDetailPage(student: student),
+            builder: (context) => StudentDetailPage(
+              student: args['student'] ?? {},
+              coachEmail: args['coachEmail'] ?? '',
+            ),
           );
         }
         if (settings.name == '/invite') {
@@ -104,6 +108,12 @@ class FitnessApp extends StatelessWidget {
               student: args['student'] ?? {},
               isReadOnly: args['isReadOnly'] ?? false,
             ),
+          );
+        }
+        if (settings.name == '/workout-library') {
+          final args = settings.arguments as Map<String, dynamic>? ?? {};
+          return MaterialPageRoute(
+            builder: (context) => WorkoutPlansLibraryPage(coachEmail: args['email'] ?? ''),
           );
         }
         return null;
