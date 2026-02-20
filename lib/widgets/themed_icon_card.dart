@@ -89,29 +89,26 @@ class ThemedIconCard extends StatelessWidget {
     switch ((cat ?? '').toLowerCase()) {
       case 'membros-inferiores':
         return {
-          'icon': FontAwesomeIcons.personRunning, 
-          'color': const Color(0xFFE67E22), // Laranja Profissional
+          'icon': FontAwesomeIcons.personWalking, // Ícone de pernas/movimento
+          'color': const Color(0xFFE67E22), 
         };
       case 'membros-superiores':
         return {
-          'icon': FontAwesomeIcons.dumbbell,
-          'color': const Color(0xFF1F6F5C), // Verde Esmeralda
+          'icon': FontAwesomeIcons.dumbbell, // Ícone de halteres para braços
+          'color': const Color(0xFF1F6F5C), 
         };
       case 'core':
+      case 'core / abdomên':
+      case 'core/abdomes':
         return {
-          'icon': FontAwesomeIcons.userNinja,
-          'color': const Color(0xFF2980B9), // Azul Focado
-        };
-      case 'funcional':
-      case 'funcional / cardio':
-        return {
-          'icon': FontAwesomeIcons.bolt,
-          'color': const Color(0xFFF1C40F), // Amarelo Energia
+          'icon': FontAwesomeIcons.childReaching, // Sugestão para CORE
+          'color': const Color(0xFF2980B9), 
         };
       case 'maquinas':
+      case 'máquinas':
         return {
-          'icon': FontAwesomeIcons.gear,
-          'color': const Color(0xFF34495E), // Cinza Máquina
+          'icon': FontAwesomeIcons.gears, // Engrenagens para máquinas
+          'color': const Color(0xFF34495E), 
         };
       case 'mobilidade':
         return {
