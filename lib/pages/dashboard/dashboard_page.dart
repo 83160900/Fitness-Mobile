@@ -199,17 +199,16 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
             decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
           ),
-          _buildDrawerItem(Icons.dashboard, 'Visão Geral', 0),
+          _buildDrawerItem(Icons.dashboard_outlined, 'Visão Geral', 0),
           if (role == 'PERSONAL') ...[
-            _buildDrawerItem(Icons.groups, 'Meus Alunos', 1, route: '/students', arguments: userData),
-            // _buildDrawerItem(Icons.trending_up, 'Evolução e Fotos', 2),
-            _buildDrawerItem(Icons.monitor_weight, 'Bioimpedância', 3, route: '/bioimpedance-students', arguments: userData),
-            _buildDrawerItem(Icons.calendar_month, 'Minha Agenda', 4, route: '/schedule', arguments: userData),
-            _buildDrawerItem(Icons.person, 'Meus Dados', 6, route: '/profile', arguments: userData),
-            _buildDrawerItem(Icons.assignment, 'Planos de Treino', 5, route: '/workout-library', arguments: userData),
+            _buildDrawerItem(Icons.groups_outlined, 'Meus Alunos', 1, route: '/students', arguments: userData),
+            _buildDrawerItem(Icons.monitor_weight_outlined, 'Bioimpedância', 3, route: '/bioimpedance-students', arguments: userData),
+            _buildDrawerItem(Icons.calendar_month_outlined, 'Minha Agenda', 4, route: '/schedule', arguments: userData),
+            _buildDrawerItem(Icons.person_outline, 'Meus Dados', 6, route: '/profile', arguments: userData),
+            _buildDrawerItem(Icons.assignment_outlined, 'Planos de Treino', 5, route: '/workout-library', arguments: userData),
           ],
           if (role == 'ALUNO') ...[
-            _buildDrawerItem(Icons.calendar_month, 'Marcar Aula', 1, route: '/schedule', arguments: userData),
+            _buildDrawerItem(Icons.calendar_month_outlined, 'Marcar Aula', 1, route: '/schedule', arguments: userData),
             _buildDrawerItem(Icons.fitness_center, 'Meu Treino', 2, route: '/workouts', arguments: {'email': userEmail}),
             _buildDrawerItem(Icons.show_chart, 'Minha Evolução', 3, route: '/bioimpedance-details', arguments: {
               'student': {
@@ -218,7 +217,7 @@ class _DashboardPageState extends State<DashboardPage> {
               },
               'isReadOnly': true,
             }),
-            _buildDrawerItem(Icons.person, 'Meus Dados', 4, route: '/profile', arguments: userData),
+            _buildDrawerItem(Icons.person_outline, 'Meus Dados', 4, route: '/profile', arguments: userData),
           ],
           const Spacer(),
           const Divider(),
@@ -233,13 +232,21 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Widget _buildDrawerItem(IconData icon, String title, int index, {String? route, Object? arguments}) {
+  Widget _buildDrawerItem(IconData icon, String title, int index, {String? route, Object? arguments, Color? iconColor}) {
     final bool isSelected = _selectedIndex == index;
+    final Color primaryColor = Theme.of(context).colorScheme.primary;
+    final Color activeColor = iconColor ?? primaryColor;
+
     return ListTile(
-      leading: Icon(icon, color: isSelected ? Theme.of(context).colorScheme.primary : Colors.grey),
+      leading: ThemedIconCard(
+        icon: icon,
+        size: 32,
+        filled: isSelected,
+      ),
       title: Text(title, style: TextStyle(
-        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-        color: isSelected ? Theme.of(context).colorScheme.primary : Colors.black87,
+        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+        color: isSelected ? primaryColor : const Color(0xFF0F2A3D),
+        fontSize: 14,
       )),
       selected: isSelected,
       onTap: () async {
