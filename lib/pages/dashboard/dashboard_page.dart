@@ -87,16 +87,23 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Widget _buildDrawerItem(IconData icon, String title, int index, {String? route, Object? arguments}) {
+    final bool isSelected = _selectedIndex == index;
     return ListTile(
-      leading: Icon(icon, color: _selectedIndex == index ? Theme.of(context).colorScheme.primary : Colors.grey),
-      title: Text(title, style: TextStyle(fontWeight: _selectedIndex == index ? FontWeight.bold : FontWeight.normal)),
-      selected: _selectedIndex == index,
+      leading: Icon(icon, color: isSelected ? Theme.of(context).colorScheme.primary : Colors.grey),
+      title: Text(title, style: TextStyle(
+        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        color: isSelected ? Theme.of(context).colorScheme.primary : Colors.black87,
+      )),
+      selected: isSelected,
       onTap: () {
-        setState(() => _selectedIndex = index);
-        Navigator.pop(context); // Fecha drawer
+        Navigator.pop(context); // Fecha o menu primeiro
         if (route != null) {
-          Navigator.pushNamed(context, route, arguments: arguments);
+          // Pequeno delay garante que o Drawer fechou antes da transição de tela
+          Future.delayed(const Duration(milliseconds: 100), () {
+            Navigator.pushNamed(context, route, arguments: arguments);
+          });
         }
+        setState(() => _selectedIndex = index);
       },
     );
   }
