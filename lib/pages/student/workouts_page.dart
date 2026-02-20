@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:fitness_mobile/widgets/themed_icon_card.dart';
 import '../../services/workout_service.dart';
 
 class WorkoutsPage extends StatefulWidget {
@@ -52,8 +53,12 @@ class _WorkoutsPageState extends State<WorkoutsPage> {
                       final exercises = (plan['items'] as List?) ?? [];
                       return Card(
                         margin: const EdgeInsets.only(bottom: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         child: ExpansionTile(
+                          leading: ThemedIconCard(
+                            icon: Icons.fitness_center,
+                            size: 40,
+                            filled: false,
+                          ),
                           title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
                           subtitle: dateStr.isNotEmpty ? Text('Criado em $dateStr') : null,
                           children: [

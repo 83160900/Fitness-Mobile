@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
+import '../../widgets/themed_icon_card.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -34,17 +35,10 @@ class _LoginPageState extends State<LoginPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // Logo e Boas-vindas (Personal Trainer Focus)
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.fitness_center,
-                      size: 80,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
+                  const ThemedIconCard(
+                    icon: Icons.fitness_center,
+                    size: 80,
+                    filled: true,
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -144,22 +138,11 @@ class _LoginPageState extends State<LoginPage> {
       onTap: () {
         Navigator.pushNamed(context, '/register', arguments: role);
       },
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: color, size: 24),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: color),
-          ),
-        ],
+      child: ThemedIconCard(
+        icon: icon,
+        label: label,
+        size: 48,
+        filled: false,
       ),
     );
   }

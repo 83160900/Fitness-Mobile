@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/workout_service.dart';
+import 'package:fitness_mobile/widgets/themed_icon_card.dart';
 
 class CreateWorkoutPage extends StatefulWidget {
   final Map<String, dynamic> student;
@@ -271,33 +272,17 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       crossAxisCount: 3,
-      mainAxisSpacing: 10,
-      crossAxisSpacing: 10,
-      childAspectRatio: 0.9,
+      mainAxisSpacing: 12,
+      crossAxisSpacing: 12,
+      childAspectRatio: 0.85,
       children: _exerciseCatalog.keys.map((cat) {
         return InkWell(
           onTap: () => _openExerciseCategory(cat),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.teal.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.teal.withOpacity(0.3)),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(_categoryIcons[cat] ?? Icons.fitness_center, color: Colors.teal, size: 32),
-                const SizedBox(height: 8),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: Text(
-                    cat,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
-            ),
+          child: ThemedIconCard(
+            category: cat,
+            label: cat,
+            size: 56,
+            filled: false,
           ),
         );
       }).toList(),

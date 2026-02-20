@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:fitness_mobile/widgets/themed_icon_card.dart';
 import '../../services/workout_service.dart';
 import '../../services/student_service.dart';
 
@@ -143,6 +144,11 @@ class _WorkoutPlansLibraryPageState extends State<WorkoutPlansLibraryPage> {
                       return Card(
                         margin: const EdgeInsets.only(bottom: 12),
                         child: ExpansionTile(
+                          leading: ThemedIconCard(
+                            icon: Icons.assignment_outlined,
+                            size: 40,
+                            filled: false,
+                          ),
                           title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
                           subtitle: Text('Original: $studentName • $exerciseCount exs • $dateStr'),
                           trailing: Row(

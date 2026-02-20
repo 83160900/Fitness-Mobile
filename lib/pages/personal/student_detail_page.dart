@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:fitness_mobile/widgets/themed_icon_card.dart';
 import '../../services/workout_service.dart';
 
 class StudentDetailPage extends StatefulWidget {
@@ -153,9 +154,10 @@ class _StudentDetailPageState extends State<StudentDetailPage> {
         side: BorderSide(color: Colors.grey.withOpacity(0.2), width: 1),
       ),
       child: ExpansionTile(
-        leading: const CircleAvatar(
-          backgroundColor: Colors.orange,
-          child: Icon(Icons.fitness_center, color: Colors.white, size: 20),
+        leading: ThemedIconCard(
+          icon: Icons.fitness_center,
+          size: 40,
+          filled: false,
         ),
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text('${exercises.length} exercícios${dateStr.isNotEmpty ? ' • Criado em $dateStr' : ''}'),

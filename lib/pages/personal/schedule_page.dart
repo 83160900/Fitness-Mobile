@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:fitness_mobile/widgets/themed_icon_card.dart';
 
 class SchedulePage extends StatefulWidget {
   @override
@@ -503,12 +504,12 @@ class _SchedulePageState extends State<SchedulePage> {
             Text('Horário: ${DateFormat('HH:mm').format(DateTime.parse(slot['startTime']))}', style: const TextStyle(fontSize: 16)),
             const SizedBox(height: 24),
             ListTile(
-              leading: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: Colors.red.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
-                child: const Icon(Icons.cancel, color: Colors.red),
+              leading: const ThemedIconCard(
+                icon: Icons.cancel_outlined,
+                size: 40,
+                filled: false,
               ),
-              title: const Text('Cancelar Aula', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+              title: const Text('Cancelar Aula', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
               subtitle: const Text('Respeitando a regra de 24h'),
               onTap: () {
                 Navigator.pop(context);
@@ -517,12 +518,12 @@ class _SchedulePageState extends State<SchedulePage> {
             ),
             const SizedBox(height: 8),
             ListTile(
-              leading: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: Colors.blue.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
-                child: const Icon(Icons.swap_horiz, color: Colors.blue),
+              leading: const ThemedIconCard(
+                icon: Icons.swap_horiz,
+                size: 40,
+                filled: false,
               ),
-              title: const Text('Trocar Data/Horário', style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold)),
+              title: const Text('Trocar Data/Horário', style: TextStyle(color: Color(0xFF0F2A3D), fontWeight: FontWeight.bold)),
               subtitle: const Text('Mover reserva para outro dia'),
               onTap: () {
                 Navigator.pop(context);
