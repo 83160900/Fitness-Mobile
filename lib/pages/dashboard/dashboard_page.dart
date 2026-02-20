@@ -132,7 +132,14 @@ class _DashboardPageState extends State<DashboardPage> {
             accountEmail: Text(role, style: const TextStyle(fontSize: 12)),
             currentAccountPicture: CircleAvatar(
               backgroundColor: Colors.white,
-              child: Text(name[0], style: TextStyle(fontSize: 24, color: Theme.of(context).colorScheme.primary)),
+              backgroundImage: (userData['photoUrl'] != null && userData['photoUrl'].toString().isNotEmpty)
+                ? (userData['photoUrl'].toString().startsWith('http')
+                  ? NetworkImage(userData['photoUrl'].toString())
+                  : NetworkImage('$baseUrl/users/photo/${userData['photoUrl'].toString().split('/').last}')) as ImageProvider
+                : null,
+              child: (userData['photoUrl'] == null || userData['photoUrl'].toString().isEmpty)
+                ? Text(name[0], style: TextStyle(fontSize: 24, color: Theme.of(context).colorScheme.primary))
+                : null,
             ),
             decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
           ),

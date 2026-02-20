@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class ProfilePage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -20,7 +23,9 @@ class _ProfilePageState extends State<ProfilePage> {
 
   bool _loading = true;
   bool _saving = false;
+  bool _uploading = false;
   String? _photoUrl;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -83,6 +88,88 @@ class _ProfilePageState extends State<ProfilePage> {
     setState(() => _saving = false);
   }
 
+  Future<void> _pickAndUploadPhoto() async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 512,
+        maxHeight: 512,
+        imageQuality: 75,
+      );
+
+      if (image == null) return;
+
+      setState(() => _uploading = true);
+
+      var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/users/upload-photo'));
+      
+      if (kIsWeb) {
+        request.files.add(http.MultipartFile.fromBytes(
+          'file',
+          await image.readAsBytes(),
+          filename: image.name,
+        ));
+      } else {
+        request.files.add(await http.MultipartFile.fromPath(
+          'file',
+          image.path,
+        ));
+      }
+
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          _photoUrl = data['url'];
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Foto carregada com sucesso!')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro no upload: ${response.statusCode}')),
+        );
+      }
+    } catch (e) {
+      print('Erro ao carregar foto: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Erro ao carregar foto.')),
+      );
+    } finally {
+      setState(() => _uploading = false);
+    }
+  }
+
+  void _showPhotoOptions() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Galeria'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickAndUploadPhoto();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.link),
+              title: const Text('URL da Imagem'),
+              onTap: () {
+                Navigator.pop(context);
+                _updatePhotoUrl(); // Mantém suporte a URL se necessário, ou remove
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _updatePhotoUrl() {
     String tempUrl = _photoUrl ?? "";
     showDialog(
@@ -126,10 +213,14 @@ class _ProfilePageState extends State<ProfilePage> {
                           CircleAvatar(
                             radius: 50,
                             backgroundImage: (_photoUrl != null && _photoUrl!.isNotEmpty)
-                                ? NetworkImage(_photoUrl!)
+                                ? (_photoUrl!.startsWith('http') 
+                                    ? NetworkImage(_photoUrl!) 
+                                    : NetworkImage('$baseUrl/users/photo/${_photoUrl!.split('/').last}')) as ImageProvider
                                 : null,
-                            child: (_photoUrl == null || _photoUrl!.isEmpty)
-                                ? const Icon(Icons.person, size: 50)
+                            child: (_photoUrl == null || _photoUrl!.isEmpty || _uploading)
+                                ? (_uploading 
+                                    ? const CircularProgressIndicator() 
+                                    : const Icon(Icons.person, size: 50))
                                 : null,
                           ),
                           Positioned(
@@ -140,7 +231,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               radius: 18,
                               child: IconButton(
                                 icon: const Icon(Icons.camera_alt, size: 18, color: Colors.white),
-                                onPressed: _updatePhotoUrl,
+                                onPressed: _uploading ? null : _showPhotoOptions,
                               ),
                             ),
                           ),
