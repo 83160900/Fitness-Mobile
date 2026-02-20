@@ -557,7 +557,7 @@ class _SchedulePageState extends State<SchedulePage> {
   }
 
   void _showMoveSelection(dynamic slot) {
-    DateTime selectedMoveDate = _selectedDay;
+    DateTime selectedMoveDate = _selectedDate;
     
     showModalBottomSheet(
       context: context,
