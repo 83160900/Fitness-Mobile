@@ -175,26 +175,27 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(notif['message'] ?? ''),
-                                  if (notif['type'] == 'RESERVA' && (notif['status'] == null || notif['status'] == 'PENDENTE' || notif['status'] == 'LIDA')) ...[
+                                  if (notif['type'] == 'RESERVA') ...[
                                     const SizedBox(height: 16),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
+                                    Wrap(
+                                      alignment: WrapAlignment.end,
+                                      spacing: 8,
                                       children: [
-                                        // Botão de Recusar (mais visível)
+                                        // Botão de Recusar
                                         TextButton.icon(
                                           onPressed: () => _confirmReserva(notif['id'], notif['slotId'], false),
-                                          icon: const Icon(Icons.cancel, color: Colors.red),
-                                          label: const Text('RECUSAR', style: TextStyle(color: Colors.red)),
+                                          icon: const Icon(Icons.cancel, color: Colors.red, size: 20),
+                                          label: const Text('RECUSAR', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
                                         ),
-                                        const SizedBox(width: 12),
-                                        // Botão de Confirmar (mais visível)
+                                        // Botão de Confirmar
                                         ElevatedButton.icon(
                                           onPressed: () => _confirmReserva(notif['id'], notif['slotId'], true),
-                                          icon: const Icon(Icons.check_circle, color: Colors.white),
-                                          label: const Text('CONFIRMAR'),
+                                          icon: const Icon(Icons.check_circle, color: Colors.white, size: 20),
+                                          label: const Text('CONFIRMAR', style: TextStyle(fontWeight: FontWeight.bold)),
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: Colors.green,
                                             foregroundColor: Colors.white,
+                                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                                           ),
                                         ),
                                       ],
