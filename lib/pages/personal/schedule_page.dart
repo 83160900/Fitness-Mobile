@@ -165,8 +165,17 @@ class _SchedulePageState extends State<SchedulePage> {
   }
 
   Widget _buildDateSelector() {
-    String dayName = DateFormat('EEEE').format(_selectedDate);
-    dayName = dayName[0].toUpperCase() + dayName.substring(1);
+    final Map<String, String> dayNamesPt = {
+      'Monday': 'Segunda-feira',
+      'Tuesday': 'Terça-feira',
+      'Wednesday': 'Quarta-feira',
+      'Thursday': 'Quinta-feira',
+      'Friday': 'Sexta-feira',
+      'Saturday': 'Sábado',
+      'Sunday': 'Domingo',
+    };
+    String dayNameEn = DateFormat('EEEE').format(_selectedDate);
+    String dayName = dayNamesPt[dayNameEn] ?? dayNameEn;
     final String dateStr = DateFormat('dd/MM').format(_selectedDate);
 
     return Padding(
@@ -262,12 +271,12 @@ class _SchedulePageState extends State<SchedulePage> {
     // Constrói a lista com seções
     final List<Widget> children = [];
 
-    // Seção: Suas aulas do dia
+    // Seção: Horários marcados
     if (mySlotsToday.isNotEmpty) {
       children.add(
         const Padding(
-          padding: EdgeInsets.only(left: 20, right: 20, top: 8, bottom: 8),
-          child: Text('Suas aulas do dia', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+          padding: EdgeInsets.only(left: 20, right: 20, top: 8, bottom: 4),
+          child: Text('Horários marcados', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
         ),
       );
       for (final s in mySlotsToday) {
@@ -275,9 +284,8 @@ class _SchedulePageState extends State<SchedulePage> {
         final status = s['status'];
         Color badgeColor = Colors.amber;
         String label = 'Aguardando aprovação';
-        Color textColor = Colors.black;
-        if (status == 'CONFIRMADO') { badgeColor = Colors.green; label = 'Confirmada'; textColor = Colors.white; }
-        if (status == 'RESERVADO') { badgeColor = Colors.yellow[700]!; label = 'Aguardando aprovação'; textColor = Colors.black; }
+        if (status == 'CONFIRMADO') { badgeColor = Colors.green; label = 'Confirmada'; }
+        if (status == 'RESERVADO') { badgeColor = Colors.yellow[700]!; label = 'Aguardando aprovação'; }
 
         children.add(
           Padding(
@@ -285,18 +293,20 @@ class _SchedulePageState extends State<SchedulePage> {
             child: Card(
               elevation: 0,
               color: badgeColor.withOpacity(0.08),
-              margin: const EdgeInsets.only(bottom: 8),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              margin: const EdgeInsets.only(bottom: 4),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               child: ListTile(
-                leading: CircleAvatar(backgroundColor: badgeColor, child: const Icon(Icons.fitness_center, color: Colors.white, size: 18)),
-                title: Text('${DateFormat('HH:mm').format(dt)} Aula', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                subtitle: Text(label, style: TextStyle(color: Colors.grey[700])),
+                dense: true,
+                visualDensity: VisualDensity.compact,
+                leading: CircleAvatar(radius: 14, backgroundColor: badgeColor, child: const Icon(Icons.fitness_center, color: Colors.white, size: 14)),
+                title: Text('${DateFormat('HH:mm').format(dt)} Aula', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                subtitle: Text(label, style: TextStyle(color: Colors.grey[700], fontSize: 12)),
               ),
             ),
           ),
         );
       }
-      children.add(const SizedBox(height: 8));
+      children.add(const SizedBox(height: 4));
       children.add(const Divider());
     }
 
@@ -304,7 +314,7 @@ class _SchedulePageState extends State<SchedulePage> {
     if (availableTimes.isNotEmpty) {
       children.add(
         const Padding(
-          padding: EdgeInsets.only(left: 20, right: 20, top: 8, bottom: 8),
+          padding: EdgeInsets.only(left: 20, right: 20, top: 4, bottom: 4),
           child: Text('Horários disponíveis', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
         ),
       );
@@ -315,15 +325,17 @@ class _SchedulePageState extends State<SchedulePage> {
             child: Card(
               elevation: 0,
               color: Colors.teal.withOpacity(0.05),
-              margin: const EdgeInsets.only(bottom: 8),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              margin: const EdgeInsets.only(bottom: 4),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               child: ListTile(
-                leading: const Icon(Icons.check_box_outline_blank, color: Colors.teal),
+                dense: true,
+                visualDensity: VisualDensity.compact,
+                leading: const Icon(Icons.check_box_outline_blank, color: Colors.teal, size: 20),
                 title: Text(
                   '${DateFormat('HH:mm').format(time)} Horário',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
                 ),
-                trailing: const Icon(Icons.add_circle_outline, color: Colors.teal),
+                trailing: const Icon(Icons.add_circle_outline, color: Colors.teal, size: 20),
                 onTap: () => _confirmReservation(time),
               ),
             ),
