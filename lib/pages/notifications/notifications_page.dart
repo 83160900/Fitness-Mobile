@@ -161,8 +161,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           ),
                           subtitle: Text(DateFormat('dd/MM HH:mm').format(date)),
                           onExpansionChanged: (expanded) {
-                            // Não marcamos como LIDA automaticamente para não sumirem os botões
-                            // se o usuário apenas fechar e abrir novamente.
+                            if (expanded && !isRead) {
+                              // Se for do aluno (CONFIRMACAO/REJEICAO), marcamos lida ao expandir
+                              if (notif['type'] == 'CONFIRMACAO' || notif['type'] == 'REJEICAO') {
+                                _markAsRead(notif['id']);
+                              }
+                            }
                           },
                           children: [
                             Padding(
@@ -176,14 +180,22 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
-                                        TextButton(
+                                        // Botão de Recusar (mais visível)
+                                        TextButton.icon(
                                           onPressed: () => _confirmReserva(notif['id'], notif['slotId'], false),
-                                          child: const Text('Recusar', style: TextStyle(color: Colors.red)),
+                                          icon: const Icon(Icons.cancel, color: Colors.red),
+                                          label: const Text('RECUSAR', style: TextStyle(color: Colors.red)),
                                         ),
-                                        const SizedBox(width: 8),
-                                        ElevatedButton(
+                                        const SizedBox(width: 12),
+                                        // Botão de Confirmar (mais visível)
+                                        ElevatedButton.icon(
                                           onPressed: () => _confirmReserva(notif['id'], notif['slotId'], true),
-                                          child: const Text('Confirmar'),
+                                          icon: const Icon(Icons.check_circle, color: Colors.white),
+                                          label: const Text('CONFIRMAR'),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.green,
+                                            foregroundColor: Colors.white,
+                                          ),
                                         ),
                                       ],
                                     )
