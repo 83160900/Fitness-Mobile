@@ -55,7 +55,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
     }
   }
 
-  Future<void> _confirmReserva(String slotId, bool confirm) async {
+  Future<void> _confirmReserva(dynamic slotId, bool confirm) async {
+    if (slotId == null) {
+      print('[DEBUG_LOG] Erro: slotId está nulo na notificação');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Erro: ID da reserva não encontrado.')),
+      );
+      return;
+    }
+
     String? reason;
     if (!confirm) {
       // Solicita motivo da recusa
@@ -64,23 +72,34 @@ class _NotificationsPageState extends State<NotificationsPage> {
     }
 
     try {
+      print('[DEBUG_LOG] Enviando confirmação de reserva: slotId=$slotId, confirm=$confirm');
       final response = await http.post(
         Uri.parse('$baseUrl/schedule/confirm'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'slotId': slotId,
+          'slotId': slotId.toString(),
           'confirm': confirm,
           'reason': reason,
         }),
-      );
+      ).timeout(const Duration(seconds: 15));
+
+      print('[DEBUG_LOG] Resposta servidor: ${response.statusCode} - ${response.body}');
+      
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(confirm ? 'Reserva confirmada!' : 'Reserva recusada.')),
         );
         _loadNotifications();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Falha no servidor: ${response.statusCode}')),
+        );
       }
     } catch (e) {
-      print('Erro ao confirmar reserva: $e');
+      print('[DEBUG_LOG] Erro ao confirmar reserva: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro de conexão: $e')),
+      );
     }
   }
 

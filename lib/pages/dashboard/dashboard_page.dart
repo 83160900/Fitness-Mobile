@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -19,6 +20,7 @@ class _DashboardPageState extends State<DashboardPage> {
   int _notificationCount = 0;
   Map<String, dynamic> _userData = {};
   bool _isLoadingProfile = true;
+  Timer? _notificationTimer;
 
   @override
   void initState() {
@@ -27,6 +29,20 @@ class _DashboardPageState extends State<DashboardPage> {
       _initUserData();
       _loadSummaryData();
       _loadNotificationCount();
+      _startNotificationTimer();
+    });
+  }
+
+  @override
+  void dispose() {
+    _notificationTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startNotificationTimer() {
+    _notificationTimer?.cancel();
+    _notificationTimer = Timer.periodic(const Duration(minutes: 2), (timer) {
+      if (mounted) _loadNotificationCount();
     });
   }
 
