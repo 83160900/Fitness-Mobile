@@ -41,7 +41,9 @@ class WorkoutService {
     try {
       final response = await http.get(Uri.parse('$baseUrl/workouts/student/$studentEmail'));
       if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+        final body = response.body;
+        print('[DEBUG_LOG] Resposta treinos aluno (${body.length} chars): ${body.substring(0, body.length > 200 ? 200 : body.length)}');
+        return jsonDecode(body);
       }
       return [];
     } catch (e) {
@@ -65,7 +67,9 @@ class WorkoutService {
     try {
       final response = await http.get(Uri.parse('$baseUrl/workouts/coach/$coachEmail'));
       if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+        final body = response.body;
+        print('[DEBUG_LOG] Resposta treinos coach (${body.length} chars): ${body.substring(0, body.length > 200 ? 200 : body.length)}');
+        return jsonDecode(body);
       }
       return [];
     } catch (e) {
