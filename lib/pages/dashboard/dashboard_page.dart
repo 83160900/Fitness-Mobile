@@ -66,7 +66,7 @@ class _DashboardPageState extends State<DashboardPage> {
           if (role == 'PERSONAL') ...[
             _buildDrawerItem(Icons.groups, 'Meus Alunos', 1, route: '/students', arguments: {'email': userEmail}),
             // _buildDrawerItem(Icons.trending_up, 'Evolução e Fotos', 2),
-            _buildDrawerItem(Icons.monitor_weight, 'Bioimpedância', 3, route: '/bioimpedance-students'),
+            _buildDrawerItem(Icons.monitor_weight, 'Bioimpedância', 3, route: '/bioimpedance-students', arguments: {'email': userEmail}),
             _buildDrawerItem(Icons.assignment, 'Planos de Treino', 4),
           ],
           if (role == 'ALUNO') ...[
