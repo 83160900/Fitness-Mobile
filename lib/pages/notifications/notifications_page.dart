@@ -55,7 +55,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     }
   }
 
-  Future<void> _confirmReserva(dynamic slotId, bool confirm) async {
+  Future<void> _confirmReserva(dynamic notificationId, dynamic slotId, bool confirm) async {
     if (slotId == null) {
       print('[DEBUG_LOG] Erro: slotId está nulo na notificação');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -86,6 +86,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
       print('[DEBUG_LOG] Resposta servidor: ${response.statusCode} - ${response.body}');
       
       if (response.statusCode == 200) {
+        // Se confirmou/recusou com sucesso, marca a notificação como LIDA/ARQUIVADA
+        if (notificationId != null) {
+          await _markAsRead(notificationId.toString());
+        }
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(confirm ? 'Reserva confirmada!' : 'Reserva recusada.')),
         );
@@ -156,9 +161,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           ),
                           subtitle: Text(DateFormat('dd/MM HH:mm').format(date)),
                           onExpansionChanged: (expanded) {
-                            if (expanded && !isRead) {
-                              _markAsRead(notif['id']);
-                            }
+                            // Não marcamos como LIDA automaticamente para não sumirem os botões
+                            // se o usuário apenas fechar e abrir novamente.
                           },
                           children: [
                             Padding(
@@ -167,18 +171,18 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(notif['message'] ?? ''),
-                                  if (notif['type'] == 'RESERVA' && (notif['status'] == null || notif['status'] == 'PENDENTE')) ...[
+                                  if (notif['type'] == 'RESERVA' && (notif['status'] == null || notif['status'] == 'PENDENTE' || notif['status'] == 'LIDA')) ...[
                                     const SizedBox(height: 16),
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
                                         TextButton(
-                                          onPressed: () => _confirmReserva(notif['slotId'], false),
+                                          onPressed: () => _confirmReserva(notif['id'], notif['slotId'], false),
                                           child: const Text('Recusar', style: TextStyle(color: Colors.red)),
                                         ),
                                         const SizedBox(width: 8),
                                         ElevatedButton(
-                                          onPressed: () => _confirmReserva(notif['slotId'], true),
+                                          onPressed: () => _confirmReserva(notif['id'], notif['slotId'], true),
                                           child: const Text('Confirmar'),
                                         ),
                                       ],
