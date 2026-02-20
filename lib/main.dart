@@ -54,12 +54,12 @@ class FitnessApp extends StatelessWidget {
             color: Colors.white,
           ),
         ),
-        tabBarTheme: TabBarTheme(
+        tabBarTheme: const TabBarThemeData(
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
           indicatorColor: secondaryColor,
           indicatorSize: TabBarIndicatorSize.label,
-          labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+          labelStyle: TextStyle(fontWeight: FontWeight.bold),
         ),
         cardTheme: CardThemeData(
           color: Colors.white,
