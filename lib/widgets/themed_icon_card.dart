@@ -86,46 +86,54 @@ class ThemedIconCard extends StatelessWidget {
   }
 
   Map<String, dynamic> _getStyleForCategory(String? cat, IconData? fallbackIcon) {
-    switch ((cat ?? '').toLowerCase()) {
-      case 'membros-inferiores':
-        return {
-          'icon': FontAwesomeIcons.personWalking, // Ícone de pernas/movimento
-          'color': const Color(0xFFE67E22), 
-        };
-      case 'membros-superiores':
-        return {
-          'icon': FontAwesomeIcons.dumbbell, // Ícone de halteres para braços
-          'color': const Color(0xFF1F6F5C), 
-        };
-      case 'core':
-      case 'core / abdomên':
-      case 'core/abdomes':
-        return {
-          'icon': FontAwesomeIcons.childReaching, // Sugestão para CORE
-          'color': const Color(0xFF2980B9), 
-        };
-      case 'maquinas':
-      case 'máquinas':
-        return {
-          'icon': FontAwesomeIcons.gears, // Engrenagens para máquinas
-          'color': const Color(0xFF34495E), 
-        };
-      case 'mobilidade':
-        return {
-          'icon': FontAwesomeIcons.personWalking,
-          'color': const Color(0xFF9B59B6), // Roxo Flexibilidade
-        };
-      case 'reabilitacao':
-      case 'reabilitação':
-        return {
-          'icon': FontAwesomeIcons.kitMedical,
-          'color': const Color(0xFFE74C3C), // Vermelho Cuidado
-        };
-      default:
-        return {
-          'icon': fallbackIcon ?? FontAwesomeIcons.folderOpen,
-          'color': const Color(0xFF1F6F5C),
-        };
+    String categoryName = (cat ?? '').toLowerCase().trim();
+    
+    if (categoryName.contains('inferiores')) {
+      return {
+        'icon': FontAwesomeIcons.personWalking,
+        'color': const Color(0xFFE67E22),
+      };
     }
+    if (categoryName.contains('superiores')) {
+      return {
+        'icon': FontAwesomeIcons.dumbbell,
+        'color': const Color(0xFF1F6F5C),
+      };
+    }
+    if (categoryName.contains('core') || categoryName.contains('abdom')) {
+      return {
+        'icon': FontAwesomeIcons.childReaching,
+        'color': const Color(0xFF2980B9),
+      };
+    }
+    if (categoryName.contains('maquina')) {
+      return {
+        'icon': FontAwesomeIcons.gears,
+        'color': const Color(0xFF34495E),
+      };
+    }
+    if (categoryName.contains('mobilidade')) {
+      return {
+        'icon': FontAwesomeIcons.personWalkingArrowRight,
+        'color': const Color(0xFF9B59B6),
+      };
+    }
+    if (categoryName.contains('reabilit')) {
+      return {
+        'icon': FontAwesomeIcons.kitMedical,
+        'color': const Color(0xFFE74C3C),
+      };
+    }
+    if (categoryName.contains('funcional') || categoryName.contains('cardio')) {
+      return {
+        'icon': FontAwesomeIcons.bolt,
+        'color': const Color(0xFFF1C40F),
+      };
+    }
+
+    return {
+      'icon': fallbackIcon ?? FontAwesomeIcons.folderOpen,
+      'color': const Color(0xFF1F6F5C),
+    };
   }
 }

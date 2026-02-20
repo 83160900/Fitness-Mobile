@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fitness_mobile/widgets/themed_icon_card.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../services/auth_service.dart';
@@ -110,17 +112,35 @@ class _BioimpedanceDetailsPageState extends State<BioimpedanceDetailsPage> with 
 
   @override
   Widget build(BuildContext context) {
+    final primaryColor = const Color(0xFF0F2A3D);
+    
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.isReadOnly ? 'Minha Evolução' : 'Bioimpedância: ${widget.student['name']}'),
+        title: Text(
+          widget.isReadOnly ? 'Minha Evolução' : 'Bioimpedância: ${widget.student['name']}',
+          style: const TextStyle(color: Colors.white),
+        ),
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
           tabs: [
-            if (!widget.isReadOnly) Tab(text: '🧠 Bioimpedância', icon: Icon(Icons.psychology)),
-            Tab(text: '📈 Evolução', icon: Icon(Icons.trending_up)),
-            Tab(text: '📊 Histórico', icon: Icon(Icons.history)),
-            Tab(text: '🎯 IA Análise', icon: Icon(Icons.auto_awesome)),
+            if (!widget.isReadOnly) 
+              const Tab(
+                text: 'Dados', 
+                icon: FaIcon(FontAwesomeIcons.fileMedical, size: 20),
+              ),
+            const Tab(
+              text: 'Evolução', 
+              icon: FaIcon(FontAwesomeIcons.chartLine, size: 20),
+            ),
+            const Tab(
+              text: 'Histórico', 
+              icon: FaIcon(FontAwesomeIcons.clockRotateLeft, size: 20),
+            ),
+            const Tab(
+              text: 'IA Analise', 
+              icon: FaIcon(FontAwesomeIcons.robot, size: 20),
+            ),
           ],
         ),
       ),
