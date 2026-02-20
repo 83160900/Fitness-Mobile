@@ -136,10 +136,12 @@ class _DashboardPageState extends State<DashboardPage> {
             // _buildDrawerItem(Icons.trending_up, 'Evolução e Fotos', 2),
             _buildDrawerItem(Icons.monitor_weight, 'Bioimpedância', 3, route: '/bioimpedance-students', arguments: userData),
             _buildDrawerItem(Icons.calendar_month, 'Minha Agenda', 4, route: '/schedule', arguments: userData),
+            _buildDrawerItem(Icons.person, 'Meus Dados', 6, route: '/profile', arguments: userData),
             _buildDrawerItem(Icons.assignment, 'Planos de Treino', 5),
           ],
           if (role == 'ALUNO') ...[
             _buildDrawerItem(Icons.calendar_month, 'Marcar Aula', 1, route: '/schedule', arguments: userData),
+              _buildDrawerItem(Icons.person, 'Meus Dados', 4, route: '/profile', arguments: userData),
             _buildDrawerItem(Icons.fitness_center, 'Meus Treinos', 2, route: '/workouts'),
             _buildDrawerItem(Icons.history, 'Meu Histórico', 3),
           ],

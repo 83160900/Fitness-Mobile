@@ -16,6 +16,7 @@ class _SchedulePageState extends State<SchedulePage> {
   String? _userRole;
   String? _userEmail;
   String? _userName;
+  String? _coachEmail; // Personal vinculado ao aluno
 
   @override
   void didChangeDependencies() {
@@ -26,7 +27,11 @@ class _SchedulePageState extends State<SchedulePage> {
       _userRole = args['role'] ?? 'ALUNO'; 
       _userName = args['name'] ?? 'Usuário';
       if (_userEmail != null && _userEmail!.isNotEmpty) {
-        _loadSlots();
+        if (_userRole == 'ALUNO') {
+          _loadCoachEmail().then((_) => _loadSlots());
+        } else {
+          _loadSlots();
+        }
       } else {
         setState(() => _isLoading = false);
       }
@@ -43,10 +48,23 @@ class _SchedulePageState extends State<SchedulePage> {
     final start = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day, 0, 0);
     final end = start.add(const Duration(days: 1));
 
+    // Se for aluno, carrega a agenda do Personal vinculado
+    final String targetPersonal = _userRole == 'PERSONAL' ? _userEmail! : (_coachEmail ?? '');
+
+    if (targetPersonal.isEmpty) {
+      setState(() => _isLoading = false);
+      if (_userRole == 'ALUNO') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Nenhum Personal vinculado encontrado. Solicite um convite.'))
+        );
+      }
+      return;
+    }
+
     try {
       final response = await http.get(Uri.parse(
-        '$baseUrl/schedule/personal/$_userEmail?start=${start.toIso8601String()}&end=${end.toIso8601String()}'
-      )).timeout(const Duration(seconds: 10)); // Timeout para evitar espera infinita
+        '$baseUrl/schedule/personal/$targetPersonal?start=${start.toIso8601String()}&end=${end.toIso8601String()}'
+      )).timeout(const Duration(seconds: 10));
       
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
@@ -71,12 +89,18 @@ class _SchedulePageState extends State<SchedulePage> {
   Future<void> _doReserve(DateTime time) async {
     setState(() => _isLoading = true);
     try {
+      final String personalEmailToUse = _userRole == 'PERSONAL' ? (_userEmail ?? '') : (_coachEmail ?? '');
+      if (personalEmailToUse.isEmpty) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Nenhum Personal vinculado.')));
+        return;
+      }
       final response = await http.post(
         Uri.parse('$baseUrl/schedule/reserve'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'personalEmail': _userEmail, 
-          'studentEmail': _userEmail, 
+          'personalEmail': personalEmailToUse,
+          'studentEmail': _userEmail,
           'startTime': time.toIso8601String(),
           'recurrence': 'NENHUMA',
         }),
@@ -84,6 +108,8 @@ class _SchedulePageState extends State<SchedulePage> {
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Horário reservado!')));
         _loadSlots();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Falha ao reservar: ${response.statusCode}')));
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao reservar.')));
@@ -176,6 +202,21 @@ class _SchedulePageState extends State<SchedulePage> {
         ),
       ),
     );
+  }
+
+  Future<void> _loadCoachEmail() async {
+    if (_userRole != 'ALUNO' || _userEmail == null || _userEmail!.isEmpty) return;
+    try {
+      final resp = await http.get(Uri.parse('$baseUrl/student/${_userEmail}/professionals')).timeout(const Duration(seconds: 10));
+      if (resp.statusCode == 200) {
+        final List pros = jsonDecode(resp.body);
+        if (pros.isNotEmpty) {
+          setState(() { _coachEmail = pros.first['email']; });
+        }
+      }
+    } catch (e) {
+      // Silencia erros, fallback trata ausência de coach
+    }
   }
 
   Widget _buildStudentList() {
@@ -321,10 +362,10 @@ class _SchedulePageState extends State<SchedulePage> {
     return GridView.builder(
       padding: const EdgeInsets.all(20),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        childAspectRatio: 1.5,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
+        crossAxisCount: 4,
+        childAspectRatio: 1.2,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
       ),
       itemCount: 17, // 06:00 as 22:00
       itemBuilder: (context, index) {
@@ -341,8 +382,8 @@ class _SchedulePageState extends State<SchedulePage> {
         Color color = Colors.grey[100]!;
         Color textColor = Colors.black54;
 
-        if (status == 'RESERVADO') { color = Colors.yellow[400]!; textColor = Colors.black; }
-        else if (status == 'CONFIRMADO') { color = Colors.green[400]!; textColor = Colors.white; }
+        if (status == 'RESERVADO') { color = Colors.yellow[600]!; textColor = Colors.black; }
+        else if (status == 'CONFIRMADO') { color = Colors.green[600]!; textColor = Colors.white; }
 
         return InkWell(
           onTap: (slot != null && (status == 'RESERVADO' || status == 'CONFIRMADO'))
@@ -364,6 +405,10 @@ class _SchedulePageState extends State<SchedulePage> {
                 Text('${hour.toString().padLeft(2, '0')}:00', style: TextStyle(fontWeight: FontWeight.bold, color: textColor)),
                 if (slot != null && slot['studentEmail'] != null)
                   Text(slot['studentEmail'].split('@')[0], style: TextStyle(fontSize: 10, color: textColor), overflow: TextOverflow.ellipsis),
+                if (status == 'RESERVADO')
+                  Text('AGUARDANDO', style: TextStyle(fontSize: 9, color: textColor.withOpacity(0.9))),
+                if (status == 'CONFIRMADO')
+                  Text('CONFIRMADO', style: TextStyle(fontSize: 9, color: textColor.withOpacity(0.9))),
                 if (status == 'LIVRE')
                   const Text('LIVRE', style: TextStyle(fontSize: 9, color: Colors.grey)),
               ],
