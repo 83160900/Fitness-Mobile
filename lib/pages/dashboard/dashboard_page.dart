@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class DashboardPage extends StatefulWidget {
   @override
@@ -7,6 +9,44 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   int _selectedIndex = 0;
+  final String baseUrl = 'https://fitness-backtend-production.up.railway.app/api';
+  Map<String, dynamic> _summary = {
+    'activeStudents': '...',
+    'alerts': '...',
+    'goalProgress': '...',
+  };
+  bool _isLoadingSummary = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // O carregamento inicial será feito no build ou via post-frame callback para pegar os args
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadSummaryData();
+    });
+  }
+
+  Future<void> _loadSummaryData() async {
+    final Map<String, dynamic> userData = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>? ?? {};
+    final String role = userData['role'] ?? '';
+    final String userEmail = userData['email'] ?? '';
+
+    if (role == 'PERSONAL' && userEmail.isNotEmpty) {
+      setState(() => _isLoadingSummary = true);
+      try {
+        final response = await http.get(Uri.parse('$baseUrl/personal/$userEmail/summary'));
+        if (response.statusCode == 200) {
+          setState(() {
+            _summary = jsonDecode(response.body);
+            _isLoadingSummary = false;
+          });
+        }
+      } catch (e) {
+        print('Erro ao carregar resumo: $e');
+        setState(() => _isLoadingSummary = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -126,9 +166,9 @@ class _DashboardPageState extends State<DashboardPage> {
             const SizedBox(height: 24),
             Row(
               children: [
-                _buildStatCard('Ativos', '24', Colors.blue),
-                _buildStatCard('Alertas', '03', Colors.orange),
-                _buildStatCard('Meta', '85%', Colors.green),
+                _buildStatCard('Ativos', _summary['activeStudents'].toString(), Colors.blue),
+                _buildStatCard('Alertas', _summary['alerts'].toString(), Colors.orange),
+                _buildStatCard('Meta', _summary['goalProgress'].toString(), Colors.green),
               ],
             ),
             const SizedBox(height: 32),
