@@ -24,40 +24,47 @@ class _SchedulePageState extends State<SchedulePage> {
     if (args != null) {
       _userEmail = args['email'];
       _userRole = args['role'] ?? 'ALUNO'; 
-      _userName = args['name'] ?? 'Aluno';
-      if (_userEmail != null) {
+      _userName = args['name'] ?? 'Usuário';
+      if (_userEmail != null && _userEmail!.isNotEmpty) {
         _loadSlots();
       } else {
         setState(() => _isLoading = false);
       }
     } else {
+      // Evita tela branca se não houver argumentos
       setState(() => _isLoading = false);
     }
   }
 
   Future<void> _loadSlots() async {
-    if (_userEmail == null) return;
+    if (_userEmail == null || _userEmail!.isEmpty) return;
     setState(() => _isLoading = true);
     
     final start = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day, 0, 0);
     final end = start.add(const Duration(days: 1));
 
     try {
-      // Nota: Para o aluno, buscaríamos a agenda do Personal dele. 
-      // Por simplicidade neste MVP, estamos usando o próprio e-mail para teste.
       final response = await http.get(Uri.parse(
         '$baseUrl/schedule/personal/$_userEmail?start=${start.toIso8601String()}&end=${end.toIso8601String()}'
-      ));
+      )).timeout(const Duration(seconds: 10)); // Timeout para evitar espera infinita
       
       if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
         setState(() {
-          _slots = jsonDecode(response.body);
+          _slots = data;
           _isLoading = false;
         });
+      } else {
+        setState(() => _isLoading = false);
       }
     } catch (e) {
       print('Erro ao carregar agenda: $e');
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Não foi possível carregar a agenda. Tente novamente.'))
+        );
+      }
     }
   }
 
@@ -132,7 +139,7 @@ class _SchedulePageState extends State<SchedulePage> {
   }
 
   Widget _buildDateSelector() {
-    String dayName = DateFormat('EEEE', 'pt_BR').format(_selectedDate);
+    String dayName = DateFormat('EEEE').format(_selectedDate);
     dayName = dayName[0].toUpperCase() + dayName.substring(1);
     final String dateStr = DateFormat('dd/MM').format(_selectedDate);
 
@@ -172,41 +179,126 @@ class _SchedulePageState extends State<SchedulePage> {
   }
 
   Widget _buildStudentList() {
-    // Lista simplificada para o Aluno (☐ 06:00)
+    // Lista simplificada para o Aluno (☐ 06:00) + histórico de cancelados do próprio aluno
     final List<DateTime> availableTimes = [];
+    final List<dynamic> canceledByMe = [];
+
     for (int h = 6; h <= 22; h++) {
       final time = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day, h, 0);
-      final slot = _slots.firstWhere((s) => 
-        DateTime.parse(s['startTime']).hour == h, 
-        orElse: () => null
-      );
-      
-      // Oculta se estiver ocupado (RESERVADO ou CONFIRMADO)
-      if (slot == null || slot['status'] == 'CANCELADO') {
+
+      // Verifica se o horário está ocupado (reservado/confirmado) — CANCELADO volta a ficar livre
+      final slot = _slots.firstWhere((s) {
+        try {
+          final startTime = DateTime.parse(s['startTime']);
+          return startTime.hour == h && s['status'] != 'CANCELADO';
+        } catch (e) {
+          return false;
+        }
+      }, orElse: () => null);
+
+      // Aluno só vê horários que NÃO estão ocupados
+      if (slot == null) {
         availableTimes.add(time);
       }
     }
 
-    if (availableTimes.isEmpty) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(20.0),
-          child: Text('Nenhum horário disponível para este dia.', textAlign: TextAlign.center),
-        ),
-      );
+    // Histórico de cancelados SOMENTE para o aluno que cancelou (no dia selecionado)
+    for (final s in _slots) {
+      try {
+        if (s['status'] == 'CANCELADO' && s['studentEmail'] == _userEmail) {
+          final dt = DateTime.parse(s['startTime']);
+          if (dt.year == _selectedDate.year && dt.month == _selectedDate.month && dt.day == _selectedDate.day) {
+            canceledByMe.add(s);
+          }
+        }
+      } catch (_) {}
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      itemCount: availableTimes.length,
-      itemBuilder: (context, index) {
-        final time = availableTimes[index];
-        return ListTile(
-          leading: const Icon(Icons.check_box_outline_blank, color: Colors.grey),
-          title: Text(DateFormat('HH:mm').format(time), style: const TextStyle(fontSize: 18)),
-          onTap: () => _confirmReservation(time),
+    // Constrói a lista com seção de horários livres e (se houver) seção de cancelados
+    final List<Widget> children = [];
+
+    if (availableTimes.isEmpty) {
+      children.add(
+        Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.calendar_today_outlined, size: 64, color: Colors.grey[300]),
+              const SizedBox(height: 16),
+              const Text('Nenhum horário livre para este dia.',
+                  style: TextStyle(color: Colors.grey, fontSize: 16),
+                  textAlign: TextAlign.center),
+            ],
+          ),
+        ),
+      );
+    } else {
+      children.add(
+        const Padding(
+          padding: EdgeInsets.only(left: 20, right: 20, top: 8, bottom: 8),
+          child: Text('Horários disponíveis', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+        ),
+      );
+      for (final time in availableTimes) {
+        children.add(
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Card(
+              elevation: 0,
+              color: Colors.teal.withOpacity(0.05),
+              margin: const EdgeInsets.only(bottom: 8),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: ListTile(
+                leading: const Icon(Icons.check_box_outline_blank, color: Colors.teal),
+                title: Text(
+                  '${DateFormat('HH:mm').format(time)} Horário',
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                ),
+                trailing: const Icon(Icons.add_circle_outline, color: Colors.teal),
+                onTap: () => _confirmReservation(time),
+              ),
+            ),
+          ),
         );
-      },
+      }
+    }
+
+    if (canceledByMe.isNotEmpty) {
+      children.add(const SizedBox(height: 8));
+      children.add(const Divider());
+      children.add(
+        const Padding(
+          padding: EdgeInsets.only(left: 20, right: 20, top: 8, bottom: 8),
+          child: Text('Seus cancelamentos', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+        ),
+      );
+      for (final s in canceledByMe) {
+        final dt = DateTime.parse(s['startTime']);
+        children.add(
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Card(
+              elevation: 0,
+              color: Colors.red.withOpacity(0.04),
+              margin: const EdgeInsets.only(bottom: 8),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: ListTile(
+                leading: const Icon(Icons.cancel, color: Colors.red),
+                title: Text(
+                  '${DateFormat('HH:mm').format(dt)} Cancelado por você',
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.red),
+                ),
+                subtitle: const Text('Este horário está novamente disponível para marcação'),
+              ),
+            ),
+          ),
+        );
+      }
+    }
+
+    return ListView(
+      children: children,
     );
   }
 
@@ -237,10 +329,13 @@ class _SchedulePageState extends State<SchedulePage> {
       itemCount: 17, // 06:00 as 22:00
       itemBuilder: (context, index) {
         int hour = 6 + index;
-        final slot = _slots.firstWhere((s) => 
-          DateTime.parse(s['startTime']).hour == hour, 
-          orElse: () => null
-        );
+        final slot = _slots.firstWhere((s) {
+          try {
+            return DateTime.parse(s['startTime']).hour == hour && s['status'] != 'CANCELADO';
+          } catch (e) {
+            return false;
+          }
+        }, orElse: () => null);
         
         String status = slot != null ? slot['status'] : 'LIVRE';
         Color color = Colors.grey[100]!;
@@ -248,16 +343,20 @@ class _SchedulePageState extends State<SchedulePage> {
 
         if (status == 'RESERVADO') { color = Colors.yellow[400]!; textColor = Colors.black; }
         else if (status == 'CONFIRMADO') { color = Colors.green[400]!; textColor = Colors.white; }
-        else if (status == 'CANCELADO') { color = Colors.red[400]!; textColor = Colors.white; }
 
         return InkWell(
           onTap: (slot != null && (status == 'RESERVADO' || status == 'CONFIRMADO'))
             ? () => _showPersonalActions(slot)
-            : null,
+            : () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Apenas alunos podem marcar novos horários.'))
+                );
+              },
           child: Container(
             decoration: BoxDecoration(
               color: color,
               borderRadius: BorderRadius.circular(8),
+              border: status == 'LIVRE' ? Border.all(color: Colors.grey[300]!) : null,
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -265,6 +364,8 @@ class _SchedulePageState extends State<SchedulePage> {
                 Text('${hour.toString().padLeft(2, '0')}:00', style: TextStyle(fontWeight: FontWeight.bold, color: textColor)),
                 if (slot != null && slot['studentEmail'] != null)
                   Text(slot['studentEmail'].split('@')[0], style: TextStyle(fontSize: 10, color: textColor), overflow: TextOverflow.ellipsis),
+                if (status == 'LIVRE')
+                  const Text('LIVRE', style: TextStyle(fontSize: 9, color: Colors.grey)),
               ],
             ),
           ),
@@ -276,29 +377,57 @@ class _SchedulePageState extends State<SchedulePage> {
   void _showPersonalActions(dynamic slot) {
     showModalBottomSheet(
       context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (context) => Container(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Ações do Personal', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Gestão da Aula', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
+              ],
+            ),
+            const Divider(),
+            const SizedBox(height: 10),
+            Text('Aluno: ${slot['studentEmail']}', style: const TextStyle(fontSize: 16)),
+            Text('Horário: ${DateFormat('HH:mm').format(DateTime.parse(slot['startTime']))}', style: const TextStyle(fontSize: 16)),
+            const SizedBox(height: 24),
             ListTile(
-              leading: const Icon(Icons.cancel, color: Colors.red),
-              title: const Text('Cancelar Aula'),
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(color: Colors.red.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+                child: const Icon(Icons.cancel, color: Colors.red),
+              ),
+              title: const Text('Cancelar Aula', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+              subtitle: const Text('Respeitando a regra de 24h'),
               onTap: () {
                 Navigator.pop(context);
                 _cancelSlot(slot['id']);
               },
             ),
+            const SizedBox(height: 8),
             ListTile(
-              leading: const Icon(Icons.swap_horiz, color: Colors.blue),
-              title: const Text('Trocar Data'),
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(color: Colors.blue.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+                child: const Icon(Icons.swap_horiz, color: Colors.blue),
+              ),
+              title: const Text('Trocar Data/Horário', style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold)),
+              subtitle: const Text('Mover reserva para outro dia'),
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Funcionalidade em breve.')));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Funcionalidade de troca sendo finalizada.'))
+                );
               },
             ),
+            const SizedBox(height: 16),
           ],
         ),
       ),

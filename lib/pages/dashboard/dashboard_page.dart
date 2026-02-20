@@ -34,16 +34,20 @@ class _DashboardPageState extends State<DashboardPage> {
     if (role == 'PERSONAL' && userEmail.isNotEmpty) {
       setState(() => _isLoadingSummary = true);
       try {
-        final response = await http.get(Uri.parse('$baseUrl/personal/$userEmail/summary'));
+        final response = await http.get(Uri.parse('$baseUrl/personal/$userEmail/summary')).timeout(const Duration(seconds: 10));
         if (response.statusCode == 200) {
           setState(() {
             _summary = jsonDecode(response.body);
             _isLoadingSummary = false;
           });
+        } else {
+          setState(() => _isLoadingSummary = false);
         }
       } catch (e) {
         print('Erro ao carregar resumo: $e');
-        setState(() => _isLoadingSummary = false);
+        if (mounted) {
+          setState(() => _isLoadingSummary = false);
+        }
       }
     }
   }
@@ -56,7 +60,7 @@ class _DashboardPageState extends State<DashboardPage> {
     final String userEmail = userData['email'] ?? '';
 
     return Scaffold(
-      drawer: _buildDrawer(context, name, role, userEmail),
+      drawer: _buildDrawer(context, name, role, userEmail, userData),
       appBar: AppBar(
         title: Text(role == 'PERSONAL' ? 'Dashboard 360°' : 'Meu Painel'),
         actions: [
@@ -85,11 +89,11 @@ class _DashboardPageState extends State<DashboardPage> {
           const SizedBox(width: 8),
         ],
       ),
-      body: _buildBody(context, name, role, userEmail),
+      body: _buildBody(context, name, role, userEmail, userData),
     );
   }
 
-  Widget _buildDrawer(BuildContext context, String name, String role, String userEmail) {
+  Widget _buildDrawer(BuildContext context, String name, String role, String userEmail, Map<String, dynamic> userData) {
     return Drawer(
       child: Column(
         children: [
@@ -104,14 +108,14 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
           _buildDrawerItem(Icons.dashboard, 'Visão Geral', 0),
           if (role == 'PERSONAL') ...[
-            _buildDrawerItem(Icons.groups, 'Meus Alunos', 1, route: '/students', arguments: {'email': userEmail}),
+            _buildDrawerItem(Icons.groups, 'Meus Alunos', 1, route: '/students', arguments: userData),
             // _buildDrawerItem(Icons.trending_up, 'Evolução e Fotos', 2),
-            _buildDrawerItem(Icons.monitor_weight, 'Bioimpedância', 3, route: '/bioimpedance-students', arguments: {'email': userEmail}),
-            _buildDrawerItem(Icons.calendar_month, 'Minha Agenda', 4, route: '/schedule', arguments: {'email': userEmail}),
+            _buildDrawerItem(Icons.monitor_weight, 'Bioimpedância', 3, route: '/bioimpedance-students', arguments: userData),
+            _buildDrawerItem(Icons.calendar_month, 'Minha Agenda', 4, route: '/schedule', arguments: userData),
             _buildDrawerItem(Icons.assignment, 'Planos de Treino', 5),
           ],
           if (role == 'ALUNO') ...[
-            _buildDrawerItem(Icons.calendar_month, 'Marcar Aula', 1, route: '/schedule', arguments: {'email': userEmail}),
+            _buildDrawerItem(Icons.calendar_month, 'Marcar Aula', 1, route: '/schedule', arguments: userData),
             _buildDrawerItem(Icons.fitness_center, 'Meus Treinos', 2, route: '/workouts'),
             _buildDrawerItem(Icons.history, 'Meu Histórico', 3),
           ],
@@ -138,19 +142,24 @@ class _DashboardPageState extends State<DashboardPage> {
       )),
       selected: isSelected,
       onTap: () {
-        Navigator.pop(context); // Fecha o menu primeiro
+        // Log de diagnóstico imediato
         if (route != null) {
-          // Pequeno delay garante que o Drawer fechou antes da transição de tela
-          Future.delayed(const Duration(milliseconds: 100), () {
-            Navigator.pushNamed(context, route, arguments: arguments);
-          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Abrindo $title...'), duration: const Duration(seconds: 1)),
+          );
+        }
+        
+        Navigator.pop(context); // Fecha o menu
+        
+        if (route != null) {
+          Navigator.pushNamed(context, route, arguments: arguments);
         }
         setState(() => _selectedIndex = index);
       },
     );
   }
 
-  Widget _buildBody(BuildContext context, String name, String role, String userEmail) {
+  Widget _buildBody(BuildContext context, String name, String role, String userEmail, Map<String, dynamic> userData) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20.0),
       child: Column(
@@ -174,7 +183,7 @@ class _DashboardPageState extends State<DashboardPage> {
               ],
             ),
             const SizedBox(height: 32),
-            _buildActionSection(context, name, userEmail),
+            _buildActionSection(context, name, userEmail, userData),
           ],
           if (role == 'ALUNO') ...[
             Text('Olá, $name!', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
@@ -207,13 +216,13 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Widget _buildActionSection(BuildContext context, String name, String email) {
+  Widget _buildActionSection(BuildContext context, String name, String email, Map<String, dynamic> userData) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text('Próximas Ações', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
-        _buildModuleCard(context, 'Meus Alunos', Icons.groups, Colors.blue, '/students', {'email': email}),
+        _buildModuleCard(context, 'Meus Alunos', Icons.groups, Colors.blue, '/students', userData),
         // _buildModuleCard(context, 'Gerar Convite', Icons.link, Colors.teal, '/invite', {'email': email}),
         // _buildModuleCard(context, 'Avaliação de Fotos', Icons.camera_alt, Colors.purple, '/photos'),
       ],
