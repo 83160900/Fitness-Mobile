@@ -123,12 +123,10 @@ class _SchedulePageState extends State<SchedulePage> {
     bool isPersonal = _userRole == 'PERSONAL';
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF4F6F8),
       appBar: AppBar(
-        title: Text(isPersonal ? 'Gestão de Agenda' : 'Marcar Aula'),
+        title: Text(isPersonal ? 'Gestão de Agenda' : 'Marcar Aula', style: const TextStyle(color: Colors.white)),
         elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -151,14 +149,24 @@ class _SchedulePageState extends State<SchedulePage> {
 
   Widget _buildHeader() {
     return Padding(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       child: Row(
         children: [
-          Icon(_userRole == 'PERSONAL' ? Icons.psychology : Icons.person, color: Colors.teal, size: 28),
-          const SizedBox(width: 12),
-          Text(
-            _userRole == 'PERSONAL' ? 'Minha Disponibilidade' : '👤 $_userName',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ThemedIconCard(
+            icon: _userRole == 'PERSONAL' ? Icons.calendar_month : Icons.person,
+            size: 40,
+            filled: true,
+          ),
+          const SizedBox(width: 16),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _userRole == 'PERSONAL' ? 'Minha Disponibilidade' : 'Sua Agenda',
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const Text('Organize seus horários de treino', style: TextStyle(color: Colors.grey, fontSize: 13)),
+            ],
           ),
         ],
       ),
@@ -197,16 +205,18 @@ class _SchedulePageState extends State<SchedulePage> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
           decoration: BoxDecoration(
-            color: Colors.teal.withOpacity(0.05),
+            color: Colors.white,
             borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFD1D5DB)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.calendar_today, size: 18, color: Colors.teal),
-              const SizedBox(width: 10),
-              Text('📅 $dayName $dateStr', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-              const Icon(Icons.arrow_drop_down),
+              const FaIcon(FontAwesomeIcons.calendarDay, size: 16, color: Color(0xFF1F6F5C)),
+              const SizedBox(width: 12),
+              Text('$dayName $dateStr', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0F2A3D))),
+              const SizedBox(width: 8),
+              const Icon(Icons.arrow_drop_down, color: Color(0xFF0F2A3D)),
             ],
           ),
         ),

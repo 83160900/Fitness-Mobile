@@ -108,7 +108,7 @@ class ThemedIconCard extends StatelessWidget {
     }
     if (categoryName.contains('maquina')) {
       return {
-        'icon': FontAwesomeIcons.gears,
+        'icon': FontAwesomeIcons.gears, // Duas engrenagens
         'color': const Color(0xFF34495E),
       };
     }
