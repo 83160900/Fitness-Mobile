@@ -212,7 +212,7 @@ class _SchedulePageState extends State<SchedulePage> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const FaIcon(FontAwesomeIcons.calendarDay, size: 16, color: Color(0xFF1F6F5C)),
+              FaIcon(FontAwesomeIcons.calendarDay, size: 16, color: const Color(0xFF1F6F5C)),
               const SizedBox(width: 12),
               Text('$dayName $dateStr', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0F2A3D))),
               const SizedBox(width: 8),
